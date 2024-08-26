@@ -147,7 +147,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between h-14 px-4"> {/* Adjusted height and padding */}
         <h2 className="text-2xl font-bold flex items-center">
           Folders
           <button
@@ -158,7 +158,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
           </button>
         </h2>
       </div>
-      <div className="overflow-y-auto flex-grow">
+      <div className="overflow-y-auto flex-grow px-4"> {/* Added horizontal padding */}
         {folders.map(folder => (
           <div key={folder.id}>
             {renderFolder(folder)}

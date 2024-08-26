@@ -78,3 +78,11 @@ export const deleteFavorite = async (favoriteId) => {
     throw new Error('Failed to delete favorite');
   }
 };
+
+export const getTasks = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites/tasks`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks');
+  }
+  return response.json();
+};

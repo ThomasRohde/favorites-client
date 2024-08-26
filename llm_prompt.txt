@@ -1,10 +1,10 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (35%), JavaScript (17%), JSON (13%), HTML (4%), CSS (4%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (38%), JavaScript (17%), JSON (13%), HTML (4%), CSS (4%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
-The main dependencies for this project are: lucide-react, react, react-dom, react-icons, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
+The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
 
 ## Project Structure
 The following is a concise directory tree of the project, limited to 3 levels deep and excluding common non-source directories:
@@ -361,7 +361,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between h-14 px-4"> {/* Adjusted height and padding */}
         <h2 className="text-2xl font-bold flex items-center">
           Folders
           <button
@@ -372,7 +372,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
           </button>
         </h2>
       </div>
-      <div className="overflow-y-auto flex-grow">
+      <div className="overflow-y-auto flex-grow px-4"> {/* Added horizontal padding */}
         {folders.map(folder => (
           <div key={folder.id}>
             {renderFolder(folder)}
@@ -398,35 +398,81 @@ export default FolderExplorer
 
 File: src\App.jsx
 
-import React, { useState, useCallback } from 'react'
-import FolderExplorer from './components/FolderExplorer'
-import FavoritesList from './components/FavoritesList'
+import React, { useState, useCallback } from "react";
+import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
+import { Home, ListTodo } from "lucide-react";
+import FolderExplorer from "./components/FolderExplorer";
+import FavoritesList from "./components/FavoritesList";
+import TasksPage from "./components/TasksPage";
 
 function App() {
-  const [selectedFolderId, setSelectedFolderId] = useState(null)
+    const [selectedFolderId, setSelectedFolderId] = useState(null);
 
-  const handleFolderSelect = useCallback((folderId) => {
-    // If the root folder (id: 1) is selected, set selectedFolderId to null
-    // This will indicate that all favorites should be shown
-    setSelectedFolderId(folderId === 1 ? null : folderId)
-  }, [])
+    const handleFolderSelect = useCallback((folderId) => {
+        setSelectedFolderId(folderId === 1 ? null : folderId);
+    }, []);
 
-  return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-1/4 p-4 bg-white shadow-md flex flex-col">
-        <div className="flex-grow overflow-hidden">
-          <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
-        </div>
-      </div>
-      <div className="w-3/4 p-4">
-        <h1 className="text-3xl font-bold mb-4">Favorites</h1>
-        <FavoritesList selectedFolderId={selectedFolderId} />
-      </div>
-    </div>
-  )
+    return (
+        <Router>
+            <div className="flex flex-col h-screen bg-gray-100">
+                <nav className="bg-white text-gray-800 border-b border-gray-200">
+                    <ul className="flex justify-start h-14 items-center px-4">
+                        <li className="mr-4">
+                            <NavLink
+                                to="/"
+                                className={({ isActive }) =>
+                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
+                                        isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <Home size={20} />
+                                <span>Home</span>
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink
+                                to="/tasks"
+                                className={({ isActive }) =>
+                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
+                                        isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+                                    }`
+                                }
+                            >
+                                <ListTodo size={20} />
+                                <span>Tasks</span>
+                            </NavLink>
+                        </li>
+                    </ul>
+                </nav>
+                <div className="flex flex-grow overflow-hidden">
+                    <div className="w-1/4 bg-white shadow-md">
+                        <div className="p-4 h-full overflow-auto">
+                            <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
+                        </div>
+                    </div>
+                    <div className="w-3/4 p-4 overflow-auto">
+                        <Routes>
+                            <Route
+                                path="/"
+                                element={
+                                    <>
+                                        <h1 className="text-3xl font-bold mb-4">Favorites</h1>
+                                        <FavoritesList selectedFolderId={selectedFolderId} />
+                                    </>
+                                }
+                            />
+                            <Route path="/tasks" element={<TasksPage />} />
+                        </Routes>
+                    </div>
+                </div>
+            </div>
+        </Router>
+    );
 }
 
-export default App
+export default App;
+
 
 ---
 
@@ -500,7 +546,8 @@ File: package.json
     "lucide-react": "^0.436.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^5.3.0"
+    "react-icons": "^5.3.0",
+    "react-router-dom": "^6.26.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
@@ -635,6 +682,14 @@ export const deleteFavorite = async (favoriteId) => {
   if (!response.ok) {
     throw new Error('Failed to delete favorite');
   }
+};
+
+export const getTasks = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites/tasks`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks');
+  }
+  return response.json();
 };
 
 ---
