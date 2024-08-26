@@ -1,0 +1,371 @@
+# Project: favorites-client
+
+## Overview
+This project is primarily written in JavaScript (25%), React (25%), JSON (19%), HTML (6%), CSS (6%) and uses the following technology stack: CSS, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+
+## Dependencies
+The main dependencies for this project are: react, react-dom, react-icons, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
+
+## Project Structure
+The following is a concise directory tree of the project, limited to 3 levels deep and excluding common non-source directories:
+
+├── src
+│   ├── components
+│   │   ├── FavoritesList.jsx
+│   │   └── FolderExplorer.jsx
+│   ├── App.jsx
+│   ├── index.css
+│   ├── main.jsx
+│   └── services
+│       └── api.js
+├── index.html
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+└── vite.config.js
+
+
+## Selected Files
+The contents of specifically selected files are included below. Each file is preceded by its relative path within the project structure.
+
+## Instructions for Analysis
+When analyzing this project:
+1. Consider the overall project structure and how the selected files fit within it.
+2. Pay attention to the relationships between different files and directories.
+3. Be prepared to answer questions about specific files, overall project architecture, or potential improvements.
+4. If asked to modify or extend the project, ensure suggestions are consistent with the existing structure and style.
+
+File: src\components\FavoritesList.jsx
+
+import React, { useState, useEffect } from 'react'
+import { getFavorites } from '../services/api'
+
+const FavoritesList = ({ selectedFolderId }) => {
+  const [favorites, setFavorites] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setLoading(true)
+      try {
+        const data = await getFavorites(selectedFolderId)
+        setFavorites(data)
+        setLoading(false)
+      } catch (err) {
+        setError('Failed to fetch favorites')
+        setLoading(false)
+      }
+    }
+
+    fetchFavorites()
+  }, [selectedFolderId])
+
+  if (loading) return <div>Loading favorites...</div>
+  if (error) return <div className="text-red-500">{error}</div>
+
+  if (!favorites || favorites.length === 0) {
+    return <div>No favorites found in this folder</div>
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {favorites.map(favorite => (
+        <div key={favorite.id} className="bg-white p-4 rounded shadow">
+          <h3 className="text-xl font-semibold mb-2">
+            <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              {favorite.title || 'Untitled'}
+            </a>
+          </h3>
+          <p className="text-gray-600 mb-2">
+            {favorite.summary 
+              ? `${favorite.summary.slice(0, 100)}${favorite.summary.length > 100 ? '...' : ''}`
+              : 'No summary available'}
+          </p>
+          <div className="flex flex-wrap">
+            {favorite.tags && favorite.tags.map(tag => (
+              <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-sm">
+                {tag.name}
+              </span>
+            ))}
+          </div>
+          <div className="text-sm text-gray-500 mt-2">
+            Created: {new Date(favorite.created_at).toLocaleDateString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default FavoritesList
+
+---
+
+File: src\components\FolderExplorer.jsx
+
+import React, { useState, useEffect } from 'react'
+import { getFolders } from '../services/api'
+import { FaFolder, FaFolderOpen } from 'react-icons/fa'
+
+const FolderExplorer = ({ onSelectFolder }) => {
+  const [folders, setFolders] = useState([])
+  const [expandedFolders, setExpandedFolders] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchFolders = async () => {
+      try {
+        const data = await getFolders()
+        setFolders(data)
+        setLoading(false)
+      } catch (err) {
+        setError('Failed to fetch folders')
+        setLoading(false)
+      }
+    }
+
+    fetchFolders()
+  }, [])
+
+  const toggleFolder = (folderId) => {
+    setExpandedFolders(prev => ({
+      ...prev,
+      [folderId]: !prev[folderId]
+    }))
+  }
+
+  const renderFolder = (folder) => {
+    const isExpanded = expandedFolders[folder.id]
+    const hasChildren = folder.children && folder.children.length > 0
+
+    return (
+      <div key={folder.id} className="ml-4">
+        <button
+          onClick={() => {
+            onSelectFolder(folder.id)
+            if (hasChildren) toggleFolder(folder.id)
+          }}
+          className="flex items-center text-left hover:text-blue-600"
+        >
+          {isExpanded ? <FaFolderOpen className="mr-2" /> : <FaFolder className="mr-2" />}
+          {folder.name}
+        </button>
+        {isExpanded && hasChildren && (
+          <div className="ml-4">
+            {folder.children.map(renderFolder)}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (loading) return <div>Loading folders...</div>
+  if (error) return <div className="text-red-500">{error}</div>
+
+  return (
+    <div className="folder-explorer">
+      {folders.map(folder => (
+        <div key={folder.id}>
+          <button
+            onClick={() => {
+              onSelectFolder(folder.id)
+              if (folder.children && folder.children.length > 0) toggleFolder(folder.id)
+            }}
+            className="flex items-center text-left hover:text-blue-600 font-bold mb-2"
+          >
+            {expandedFolders[folder.id] ? <FaFolderOpen className="mr-2" /> : <FaFolder className="mr-2" />}
+            {folder.id === 1 ? "Favorites" : folder.name}
+          </button>
+          {expandedFolders[folder.id] && folder.children && folder.children.map(renderFolder)}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default FolderExplorer
+
+---
+
+File: src\App.jsx
+
+import React, { useState } from 'react'
+import FolderExplorer from './components/FolderExplorer'
+import FavoritesList from './components/FavoritesList'
+
+function App() {
+  const [selectedFolderId, setSelectedFolderId] = useState(null)
+
+  const handleFolderSelect = (folderId) => {
+    setSelectedFolderId(folderId)
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <div className="w-1/4 p-4 bg-white shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Folders</h2>
+        <FolderExplorer onSelectFolder={handleFolderSelect} />
+      </div>
+      <div className="w-3/4 p-4">
+        <h1 className="text-3xl font-bold mb-4">Favorites</h1>
+        <FavoritesList selectedFolderId={selectedFolderId} />
+      </div>
+    </div>
+  )
+}
+
+export default App
+
+---
+
+File: src\index.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.folder-explorer button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+  }
+  
+  .folder-explorer button:hover {
+    color: #3b82f6; /* Tailwind's blue-500 */
+  }
+
+---
+
+File: src\main.jsx
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+
+---
+
+File: index.html
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Favorites API Frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+---
+
+File: package.json
+
+{
+  "name": "favorites-api-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.23",
+    "tailwindcss": "^3.3.2",
+    "vite": "^4.3.2"
+  }
+}
+
+
+---
+
+File: postcss.config.js
+
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+---
+
+File: tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
+---
+
+File: vite.config.js
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()]
+})
+
+---
+
+File: src\services\api.js
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export const getFolders = async () => {
+  const response = await fetch(`${API_BASE_URL}/folders`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch folders');
+  }
+  return response.json();
+};
+
+export const getFavorites = async (folderId = null) => {
+  const url = folderId 
+    ? `${API_BASE_URL}/folders/${folderId}/favorites`
+    : `${API_BASE_URL}/favorites`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch favorites');
+  }
+  return response.json();
+};
+
+// Add more API functions as needed
+
+---
+
