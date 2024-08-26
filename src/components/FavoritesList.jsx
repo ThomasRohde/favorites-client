@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { getFavorites, getFolders } from '../services/api'
-import EditButton from './EditButton'
-import DeleteButton from './DeleteButton'
 import EditFavorite from './EditFavorite'
 import DeleteFavorite from './DeleteFavorite'
 
@@ -10,8 +8,6 @@ const FavoritesList = ({ selectedFolderId }) => {
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [editingFavorite, setEditingFavorite] = useState(null)
-  const [deletingFavorite, setDeletingFavorite] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,8 +67,14 @@ const FavoritesList = ({ selectedFolderId }) => {
                 </a>
               </h3>
               <div className="flex space-x-2">
-                <EditButton onClick={() => setEditingFavorite(favorite)} />
-                <DeleteButton onClick={() => setDeletingFavorite(favorite)} />
+                <EditFavorite
+                  favorite={favorite}
+                  onUpdate={handleUpdateFavorite}
+                />
+                <DeleteFavorite
+                  favorite={favorite}
+                  onDelete={handleDeleteFavorite}
+                />
               </div>
             </div>
             {breadcrumb.length > 0 && (
@@ -103,20 +105,6 @@ const FavoritesList = ({ selectedFolderId }) => {
           </div>
         )
       })}
-      {editingFavorite && (
-        <EditFavorite
-          favorite={editingFavorite}
-          onClose={() => setEditingFavorite(null)}
-          onUpdate={handleUpdateFavorite}
-        />
-      )}
-      {deletingFavorite && (
-        <DeleteFavorite
-          favorite={deletingFavorite}
-          onClose={() => setDeletingFavorite(null)}
-          onDelete={handleDeleteFavorite}
-        />
-      )}
     </div>
   )
 }
