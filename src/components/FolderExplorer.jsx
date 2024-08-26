@@ -88,7 +88,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
         <div className={`flex items-center group ${isSelected ? 'bg-blue-100 rounded' : ''}`}>
           <button
             onClick={() => {
-              onSelectFolder(folder.id)
+              onSelectFolder(folder.id, folder.name)
               if (hasChildren) toggleFolder(folder.id)
             }}
             className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold text-blue-600' : ''}`}

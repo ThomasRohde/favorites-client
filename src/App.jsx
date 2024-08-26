@@ -7,11 +7,12 @@ import TasksPage from "./components/TasksPage";
 
 function App() {
     const [selectedFolderId, setSelectedFolderId] = useState(null);
+    const [selectedFolderName, setSelectedFolderName] = useState("All Favorites");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const handleFolderSelect = useCallback((folderId) => {
+    const handleFolderSelect = useCallback((folderId, folderName) => {
         setSelectedFolderId(folderId === 1 ? null : folderId);
-        // Removed the automatic closing of the sidebar
+        setSelectedFolderName(folderId === 1 ? "All Favorites" : folderName);
     }, []);
 
     const toggleSidebar = () => {
@@ -89,7 +90,7 @@ function App() {
                                 path="/"
                                 element={
                                     <>
-                                        <h1 className="text-3xl font-bold mb-4">Favorites</h1>
+                                        <h1 className="text-3xl font-bold mb-4">{selectedFolderName}</h1>
                                         <FavoritesList selectedFolderId={selectedFolderId} />
                                     </>
                                 }
