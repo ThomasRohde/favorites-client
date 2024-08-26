@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { getFolders, createFolder, deleteFolder, renameFolder } from '../services/api'
-import { FaFolder, FaFolderOpen, FaTrash, FaEdit, FaPlus } from 'react-icons/fa'
+import { Folder, FolderOpen, Trash2, Edit, Plus, HelpCircle } from 'lucide-react'
+import CreateFolderModal from './CreateFolderModal'
 
 const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
   const [folders, setFolders] = useState([])
   const [expandedFolders, setExpandedFolders] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [newFolderName, setNewFolderName] = useState('')
   const [editingFolder, setEditingFolder] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchFolders()
@@ -35,12 +36,16 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
     }))
   }
 
-  const handleCreateFolder = async (parentId = null) => {
-    if (newFolderName.trim() === '') return
+  const handleCreateFolder = async (name, description) => {
+    const parentId = selectedFolderId === null ? 1 : selectedFolderId // Use root (1) if no folder is selected
     try {
-      await createFolder(newFolderName, parentId)
-      setNewFolderName('')
+      await createFolder(name, parentId, description)
       fetchFolders()
+      // Expand the parent folder to show the new child
+      setExpandedFolders(prev => ({
+        ...prev,
+        [parentId]: true
+      }))
     } catch (err) {
       setError('Failed to create folder')
     }
@@ -59,32 +64,17 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
     }
   }
 
-  const handleRenameFolder = async (folderId) => {
+  const handleRenameFolder = async (folderId, newName) => {
     if (folderId === 1) {
       setError('Cannot rename the root folder')
       return
     }
-    if (editingFolder === folderId && newFolderName.trim() !== '') {
-      try {
-        await renameFolder(folderId, newFolderName)
-        setEditingFolder(null)
-        setNewFolderName('')
-        fetchFolders()
-      } catch (err) {
-        setError('Failed to rename folder')
-      }
-    } else {
-      setEditingFolder(folderId)
-      setNewFolderName(folders.find(f => f.id === folderId).name)
-    }
-  }
-
-  const handleKeyPress = (e, folderId) => {
-    if (e.key === 'Enter') {
-      handleRenameFolder(folderId)
-    } else if (e.key === 'Escape') {
+    try {
+      await renameFolder(folderId, newName)
       setEditingFolder(null)
-      setNewFolderName('')
+      fetchFolders()
+    } catch (err) {
+      setError('Failed to rename folder')
     }
   }
 
@@ -104,14 +94,20 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
             }}
             className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold' : ''}`}
           >
-            {isExpanded ? <FaFolderOpen className="mr-2 text-blue-500" /> : <FaFolder className="mr-2 text-blue-500" />}
+            {isExpanded ? <FolderOpen className="mr-2 text-blue-500" size={18} /> : <Folder className="mr-2 text-blue-500" size={18} />}
             {editingFolder === folder.id ? (
               <input
                 type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                onBlur={() => handleRenameFolder(folder.id)}
-                onKeyDown={(e) => handleKeyPress(e, folder.id)}
+                value={folder.name}
+                onChange={(e) => handleRenameFolder(folder.id, e.target.value)}
+                onBlur={() => setEditingFolder(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRenameFolder(folder.id, e.target.value)
+                  } else if (e.key === 'Escape') {
+                    setEditingFolder(null)
+                  }
+                }}
                 className="border-b border-gray-300 focus:outline-none focus:border-blue-500"
                 autoFocus
               />
@@ -119,16 +115,24 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
               folder.name
             )}
           </button>
-          {!isRootFolder && (
-            <div className="ml-2 hidden group-hover:flex">
-              <button onClick={() => handleRenameFolder(folder.id)} className="text-gray-500 hover:text-blue-600 mr-2">
-                <FaEdit />
-              </button>
-              <button onClick={() => handleDeleteFolder(folder.id)} className="text-gray-500 hover:text-red-600">
-                <FaTrash />
-              </button>
-            </div>
-          )}
+          <div className="ml-2 hidden group-hover:flex">
+            {!isRootFolder && (
+              <>
+                <button onClick={() => setEditingFolder(folder.id)} className="text-gray-500 hover:text-blue-600 mr-2">
+                  <Edit size={16} />
+                </button>
+                <button onClick={() => handleDeleteFolder(folder.id)} className="text-gray-500 hover:text-red-600 mr-2">
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="text-gray-500 hover:text-green-600"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
         {isExpanded && hasChildren && (
           <div className="ml-4 mt-2">
@@ -144,19 +148,12 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center">
-        <input
-          type="text"
-          value={newFolderName}
-          onChange={(e) => setNewFolderName(e.target.value)}
-          placeholder="New folder name"
-          className="border border-gray-300 rounded-l px-2 py-1 focus:outline-none focus:border-blue-500"
-        />
+      <div className="mb-4 flex items-center space-x-2">
         <button
-          onClick={() => handleCreateFolder()}
-          className="bg-blue-500 text-white px-2 py-1 rounded-r hover:bg-blue-600 focus:outline-none"
+          onClick={() => alert('Help: Hover over a folder to see options. Click + to create a new subfolder, pencil to rename, or trash to delete.')}
+          className="bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300 focus:outline-none flex items-center justify-center"
         >
-          <FaPlus />
+          <HelpCircle size={18} />
         </button>
       </div>
       <div className="overflow-y-auto flex-grow">
@@ -166,6 +163,11 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
           </div>
         ))}
       </div>
+      <CreateFolderModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateFolder={handleCreateFolder}
+      />
     </div>
   )
 }
