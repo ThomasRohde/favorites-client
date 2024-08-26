@@ -14,7 +14,6 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 p-4 bg-white shadow-md flex flex-col">
-        <h2 className="text-2xl font-bold mb-4">Folders</h2>
         <div className="flex-grow overflow-hidden">
           <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
         </div>

@@ -55,3 +55,26 @@ export const renameFolder = async (folderId, newName) => {
   }
   return response.json();
 };
+
+export const updateFavorite = async (favoriteId, updateData) => {
+  const response = await fetch(`${API_BASE_URL}/favorites/${favoriteId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updateData),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update favorite');
+  }
+  return response.json();
+};
+
+export const deleteFavorite = async (favoriteId) => {
+  const response = await fetch(`${API_BASE_URL}/favorites/${favoriteId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete favorite');
+  }
+};

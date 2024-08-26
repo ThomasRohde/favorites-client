@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { getFolders, createFolder, deleteFolder, renameFolder } from '../services/api'
 import { Folder, FolderOpen, Trash2, Edit, Plus, HelpCircle } from 'lucide-react'
 import CreateFolderModal from './CreateFolderModal'
+import HelpModal from './HelpModal'
 
 const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
   const [folders, setFolders] = useState([])
@@ -9,7 +10,8 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editingFolder, setEditingFolder] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false)
 
   useEffect(() => {
     fetchFolders()
@@ -18,10 +20,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
   const fetchFolders = async () => {
     try {
       const data = await getFolders()
-      const updatedData = data.map(folder => 
-        folder.id === 1 ? { ...folder, name: 'Folders' } : folder
-      )
-      setFolders(updatedData)
+      setFolders(data)
       setLoading(false)
     } catch (err) {
       setError('Failed to fetch folders')
@@ -127,7 +126,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
               </>
             )}
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsCreateModalOpen(true)}
               className="text-gray-500 hover:text-green-600"
             >
               <Plus size={16} />
@@ -148,13 +147,16 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center space-x-2">
-        <button
-          onClick={() => alert('Help: Hover over a folder to see options. Click + to create a new subfolder, pencil to rename, or trash to delete.')}
-          className="bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300 focus:outline-none flex items-center justify-center"
-        >
-          <HelpCircle size={18} />
-        </button>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-bold flex items-center">
+          Folders
+          <button
+            onClick={() => setIsHelpModalOpen(true)}
+            className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            <HelpCircle size={20} />
+          </button>
+        </h2>
       </div>
       <div className="overflow-y-auto flex-grow">
         {folders.map(folder => (
@@ -164,9 +166,13 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
         ))}
       </div>
       <CreateFolderModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onCreateFolder={handleCreateFolder}
+      />
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
       />
     </div>
   )
