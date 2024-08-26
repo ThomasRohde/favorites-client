@@ -1,23 +1,42 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
-import { Home, ListTodo } from "lucide-react";
+import { Home, ListTodo, Menu, X } from "lucide-react";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
 import TasksPage from "./components/TasksPage";
 
 function App() {
     const [selectedFolderId, setSelectedFolderId] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleFolderSelect = useCallback((folderId) => {
         setSelectedFolderId(folderId === 1 ? null : folderId);
+        // Removed the automatic closing of the sidebar
     }, []);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.classList.add('sidebar-open');
+        } else {
+            document.body.classList.remove('sidebar-open');
+        }
+    }, [isSidebarOpen]);
 
     return (
         <Router>
             <div className="flex flex-col h-screen bg-gray-100">
-                <nav className="bg-white text-gray-800 border-b border-gray-200">
-                    <ul className="flex justify-start h-14 items-center px-4">
-                        <li className="mr-4">
+                <nav className="bg-white text-gray-800 border-b border-gray-200 z-20">
+                    <ul className="flex justify-between h-14 items-center px-4">
+                        <li className="md:hidden">
+                            <button onClick={toggleSidebar} className="p-2">
+                                <Menu size={24} />
+                            </button>
+                        </li>
+                        <li className="flex">
                             <NavLink
                                 to="/"
                                 className={({ isActive }) =>
@@ -27,10 +46,8 @@ function App() {
                                 }
                             >
                                 <Home size={20} />
-                                <span>Home</span>
+                                <span className="hidden md:inline">Home</span>
                             </NavLink>
-                        </li>
-                        <li>
                             <NavLink
                                 to="/tasks"
                                 className={({ isActive }) =>
@@ -40,18 +57,33 @@ function App() {
                                 }
                             >
                                 <ListTodo size={20} />
-                                <span>Tasks</span>
+                                <span className="hidden md:inline">Tasks</span>
                             </NavLink>
                         </li>
                     </ul>
                 </nav>
                 <div className="flex flex-grow overflow-hidden">
-                    <div className="w-1/4 bg-white shadow-md">
+                    {/* Sidebar for mobile */}
+                    <div className={`md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className={`fixed inset-y-0 left-0 w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
+                                <h2 className="text-xl font-bold">Folders</h2>
+                                <button onClick={toggleSidebar} className="p-2">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            <div className="p-4 h-full overflow-auto">
+                                <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
+                            </div>
+                        </div>
+                    </div>
+                    {/* Sidebar for desktop */}
+                    <div className="hidden md:block md:w-1/4 bg-white shadow-md">
                         <div className="p-4 h-full overflow-auto">
                             <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
                         </div>
                     </div>
-                    <div className="w-3/4 p-4 overflow-auto">
+                    <div className="w-full md:w-3/4 p-4 overflow-auto">
                         <Routes>
                             <Route
                                 path="/"

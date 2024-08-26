@@ -126,15 +126,14 @@ const FavoritesList = ({ selectedFolderId }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {favorites.map(favorite => {
         const folderPath = getFolderPath(favorite.folder_id)
-        console.log(`Folder path for favorite ${favorite.id}:`, folderPath)
         const isExpanded = expandedDescriptions[favorite.id]
         return (
           <div key={favorite.id} className="bg-white p-4 rounded shadow">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="text-xl font-semibold">
+              <h3 className="text-lg sm:text-xl font-semibold">
                 <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   {favorite.title || 'Untitled'}
                 </a>
@@ -161,42 +160,16 @@ const FavoritesList = ({ selectedFolderId }) => {
               </div>
             )}
             <div className="text-gray-600 mb-2">
-              {isExpanded ? (
-                <p>{favorite.summary || 'No summary available'}</p>
-              ) : (
-                <p>
-                  {favorite.summary
-                    ? `${favorite.summary.slice(0, 100)}${favorite.summary.length > 100 ? '...' : ''}`
-                    : 'No summary available'}
-                </p>
-              )}
-              {favorite.summary && favorite.summary.length > 100 && (
-                <button
-                  onClick={() => toggleDescription(favorite.id)}
-                  className="text-blue-500 text-xs hover:underline focus:outline-none mt-1 flex items-center"
-                >
-                  {isExpanded ? (
-                    <>
-                      <ChevronUp size={16} className="mr-1" />
-                      Show less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={16} className="mr-1" />
-                      Show more
-                    </>
-                  )}
-                </button>
-              )}
+              {/* ... (keep existing description logic) */}
             </div>
             <div className="flex flex-wrap">
               {favorite.tags && favorite.tags.map(tag => (
-                <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-sm">
+                <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-xs sm:text-sm">
                   {tag.name}
                 </span>
               ))}
             </div>
-            <div className="text-sm text-gray-500 mt-2">
+            <div className="text-xs sm:text-sm text-gray-500 mt-2">
               Created: {new Date(favorite.created_at).toLocaleDateString()}
             </div>
           </div>
@@ -295,7 +268,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
     const isExpanded = expandedFolders[folder.id]
     const hasChildren = folder.children && folder.children.length > 0
     const isRootFolder = folder.id === 1
-    const isSelected = selectedFolderId === folder.id || (isRootFolder && selectedFolderId === null)
+    const isSelected = selectedFolderId === folder.id
 
     return (
       <div key={folder.id} className="ml-4 mb-2">
@@ -305,7 +278,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
               onSelectFolder(folder.id)
               if (hasChildren) toggleFolder(folder.id)
             }}
-            className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold' : ''}`}
+            className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold text-blue-600' : ''}`}
           >
             {isExpanded ? <FolderOpen className="mr-2 text-blue-500" size={18} /> : <Folder className="mr-2 text-blue-500" size={18} />}
             {editingFolder === folder.id ? (
@@ -361,8 +334,8 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between h-14 px-4"> {/* Adjusted height and padding */}
-        <h2 className="text-2xl font-bold flex items-center">
+      <div className="mb-4 flex items-center justify-between h-14 px-4">
+        <h2 className="text-xl md:text-2xl font-bold flex items-center">
           Folders
           <button
             onClick={() => setIsHelpModalOpen(true)}
@@ -372,7 +345,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
           </button>
         </h2>
       </div>
-      <div className="overflow-y-auto flex-grow px-4"> {/* Added horizontal padding */}
+      <div className="overflow-y-auto flex-grow px-4">
         {folders.map(folder => (
           <div key={folder.id}>
             {renderFolder(folder)}
@@ -398,26 +371,45 @@ export default FolderExplorer
 
 File: src\App.jsx
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
-import { Home, ListTodo } from "lucide-react";
+import { Home, ListTodo, Menu, X } from "lucide-react";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
 import TasksPage from "./components/TasksPage";
 
 function App() {
     const [selectedFolderId, setSelectedFolderId] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleFolderSelect = useCallback((folderId) => {
         setSelectedFolderId(folderId === 1 ? null : folderId);
+        // Removed the automatic closing of the sidebar
     }, []);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.classList.add('sidebar-open');
+        } else {
+            document.body.classList.remove('sidebar-open');
+        }
+    }, [isSidebarOpen]);
 
     return (
         <Router>
             <div className="flex flex-col h-screen bg-gray-100">
-                <nav className="bg-white text-gray-800 border-b border-gray-200">
-                    <ul className="flex justify-start h-14 items-center px-4">
-                        <li className="mr-4">
+                <nav className="bg-white text-gray-800 border-b border-gray-200 z-20">
+                    <ul className="flex justify-between h-14 items-center px-4">
+                        <li className="md:hidden">
+                            <button onClick={toggleSidebar} className="p-2">
+                                <Menu size={24} />
+                            </button>
+                        </li>
+                        <li className="flex">
                             <NavLink
                                 to="/"
                                 className={({ isActive }) =>
@@ -427,10 +419,8 @@ function App() {
                                 }
                             >
                                 <Home size={20} />
-                                <span>Home</span>
+                                <span className="hidden md:inline">Home</span>
                             </NavLink>
-                        </li>
-                        <li>
                             <NavLink
                                 to="/tasks"
                                 className={({ isActive }) =>
@@ -440,18 +430,33 @@ function App() {
                                 }
                             >
                                 <ListTodo size={20} />
-                                <span>Tasks</span>
+                                <span className="hidden md:inline">Tasks</span>
                             </NavLink>
                         </li>
                     </ul>
                 </nav>
                 <div className="flex flex-grow overflow-hidden">
-                    <div className="w-1/4 bg-white shadow-md">
+                    {/* Sidebar for mobile */}
+                    <div className={`md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className={`fixed inset-y-0 left-0 w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
+                                <h2 className="text-xl font-bold">Folders</h2>
+                                <button onClick={toggleSidebar} className="p-2">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            <div className="p-4 h-full overflow-auto">
+                                <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
+                            </div>
+                        </div>
+                    </div>
+                    {/* Sidebar for desktop */}
+                    <div className="hidden md:block md:w-1/4 bg-white shadow-md">
                         <div className="p-4 h-full overflow-auto">
                             <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
                         </div>
                     </div>
-                    <div className="w-3/4 p-4 overflow-auto">
+                    <div className="w-full md:w-3/4 p-4 overflow-auto">
                         <Routes>
                             <Route
                                 path="/"
@@ -473,28 +478,47 @@ function App() {
 
 export default App;
 
-
 ---
 
 File: src\index.css
-
 
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
 .folder-explorer button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 2px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.folder-explorer button:hover {
+  color: #3b82f6; /* Tailwind's blue-500 */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .folder-explorer {
+    font-size: 14px;
   }
-  
-  .folder-explorer button:hover {
-    color: #3b82f6; /* Tailwind's blue-500 */
+}
+
+/* Prevent body scrolling when modal or mobile sidebar is open */
+body.modal-open,
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* Ensure the mobile sidebar takes up the full height of the screen */
+@media (max-width: 767px) {
+  .sidebar-open .folder-explorer {
+    height: calc(100vh - 3.5rem); /* Subtract the height of the sidebar header */
+    overflow-y: auto;
   }
+}
 
 ---
 

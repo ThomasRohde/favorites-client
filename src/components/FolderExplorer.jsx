@@ -81,7 +81,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
     const isExpanded = expandedFolders[folder.id]
     const hasChildren = folder.children && folder.children.length > 0
     const isRootFolder = folder.id === 1
-    const isSelected = selectedFolderId === folder.id || (isRootFolder && selectedFolderId === null)
+    const isSelected = selectedFolderId === folder.id
 
     return (
       <div key={folder.id} className="ml-4 mb-2">
@@ -91,7 +91,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
               onSelectFolder(folder.id)
               if (hasChildren) toggleFolder(folder.id)
             }}
-            className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold' : ''}`}
+            className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold text-blue-600' : ''}`}
           >
             {isExpanded ? <FolderOpen className="mr-2 text-blue-500" size={18} /> : <Folder className="mr-2 text-blue-500" size={18} />}
             {editingFolder === folder.id ? (
@@ -147,8 +147,8 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
   return (
     <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between h-14 px-4"> {/* Adjusted height and padding */}
-        <h2 className="text-2xl font-bold flex items-center">
+      <div className="mb-4 flex items-center justify-between h-14 px-4">
+        <h2 className="text-xl md:text-2xl font-bold flex items-center">
           Folders
           <button
             onClick={() => setIsHelpModalOpen(true)}
@@ -158,7 +158,7 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
           </button>
         </h2>
       </div>
-      <div className="overflow-y-auto flex-grow px-4"> {/* Added horizontal padding */}
+      <div className="overflow-y-auto flex-grow px-4">
         {folders.map(folder => (
           <div key={folder.id}>
             {renderFolder(folder)}
