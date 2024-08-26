@@ -19,4 +19,39 @@ export const getFavorites = async (folderId = null) => {
   return response.json();
 };
 
-// Add more API functions as needed
+export const createFolder = async (name, parentId = null) => {
+  const response = await fetch(`${API_BASE_URL}/folders`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, parent_id: parentId }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create folder');
+  }
+  return response.json();
+};
+
+export const deleteFolder = async (folderId) => {
+  const response = await fetch(`${API_BASE_URL}/folders/${folderId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete folder');
+  }
+};
+
+export const renameFolder = async (folderId, newName) => {
+  const response = await fetch(`${API_BASE_URL}/folders/${folderId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: newName }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to rename folder');
+  }
+  return response.json();
+};
