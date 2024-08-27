@@ -126,14 +126,15 @@ const FavoritesList = ({ selectedFolderId }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {favorites.map(favorite => {
         const folderPath = getFolderPath(favorite.folder_id)
+        console.log(`Folder path for favorite ${favorite.id}:`, folderPath)
         const isExpanded = expandedDescriptions[favorite.id]
         return (
           <div key={favorite.id} className="bg-white p-4 rounded shadow">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="text-lg sm:text-xl font-semibold">
+              <h3 className="text-xl font-semibold">
                 <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   {favorite.title || 'Untitled'}
                 </a>
@@ -160,16 +161,42 @@ const FavoritesList = ({ selectedFolderId }) => {
               </div>
             )}
             <div className="text-gray-600 mb-2">
-              {/* ... (keep existing description logic) */}
+              {isExpanded ? (
+                <p>{favorite.summary || 'No summary available'}</p>
+              ) : (
+                <p>
+                  {favorite.summary
+                    ? `${favorite.summary.slice(0, 100)}${favorite.summary.length > 100 ? '...' : ''}`
+                    : 'No summary available'}
+                </p>
+              )}
+              {favorite.summary && favorite.summary.length > 100 && (
+                <button
+                  onClick={() => toggleDescription(favorite.id)}
+                  className="text-blue-500 text-xs hover:underline focus:outline-none mt-1 flex items-center"
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp size={16} className="mr-1" />
+                      Show less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown size={16} className="mr-1" />
+                      Show more
+                    </>
+                  )}
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap">
               {favorite.tags && favorite.tags.map(tag => (
-                <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-xs sm:text-sm">
+                <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-sm">
                   {tag.name}
                 </span>
               ))}
             </div>
-            <div className="text-xs sm:text-sm text-gray-500 mt-2">
+            <div className="text-sm text-gray-500 mt-2">
               Created: {new Date(favorite.created_at).toLocaleDateString()}
             </div>
           </div>
