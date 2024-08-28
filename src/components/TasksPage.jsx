@@ -1,58 +1,58 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { getTasks } from '../services/api'
+import React, { useState, useEffect } from 'react';
+import { getTasks } from '../services/api';
+import { useTheme } from '../ThemeContext';
 
 const TasksPage = () => {
-  const [tasks, setTasks] = useState([])
-
-  const fetchTasks = useCallback(async () => {
-    try {
-      const fetchedTasks = await getTasks()
-      setTasks(fetchedTasks)
-    } catch (error) {
-      console.error('Error fetching tasks:', error)
-    }
-  }, [])
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
-    fetchTasks() // Fetch tasks immediately on component mount
+    const fetchTasks = async () => {
+      try {
+        const tasksData = await getTasks();
+        setTasks(tasksData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        setError('Failed to fetch tasks');
+        setLoading(false);
+      }
+    };
 
-    const intervalId = setInterval(fetchTasks, 2000) // Poll every 2 seconds
+    fetchTasks();
 
-    return () => clearInterval(intervalId) // Cleanup on unmount
-  }, [fetchTasks])
+    // Set up polling every 5 seconds
+    const pollInterval = setInterval(fetchTasks, 5000);
+
+    // Clean up function to clear the interval when the component unmounts
+    return () => clearInterval(pollInterval);
+  }, []);
+
+  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading tasks...</div>;
+  if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>;
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Tasks</h1>
-      <div className="bg-white rounded shadow p-4">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Tasks</h2>
+      <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
         {tasks.length === 0 ? (
-          <p>No tasks found.</p>
+          <p className="text-gray-600 dark:text-gray-400">No tasks found.</p>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="space-y-4">
             {tasks.map((task) => (
-              <li key={task.id} className="py-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{task.name}</p>
-                    <p className="text-sm text-gray-500">{task.status}</p>
-                  </div>
-                  <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                    {task.progress}%
-                  </div>
-                </div>
-                <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full"
-                    style={{ width: `${task.progress}%` }}
-                  ></div>
-                </div>
+              <li key={task.id} className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{task.name}</h3>
+                <p className="text-gray-600 dark:text-gray-400">Status: {task.status}</p>
+                <p className="text-gray-600 dark:text-gray-400">Progress: {task.progress}</p>
               </li>
             ))}
           </ul>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TasksPage
+export default TasksPage;

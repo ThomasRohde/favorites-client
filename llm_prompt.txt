@@ -1,7 +1,7 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (38%), JavaScript (17%), JSON (13%), HTML (4%), CSS (4%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (38%), JavaScript (15%), JSON (12%), HTML (4%), CSS (4%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
 The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
@@ -26,7 +26,8 @@ The following is a concise directory tree of the project, limited to 3 levels de
 ├── package.json
 ├── postcss.config.js
 ├── tailwind.config.js
-└── vite.config.js
+├── vite.config.js
+└── TODO.md
 
 
 ## Selected Files
@@ -46,8 +47,10 @@ import { getFavorites, getFolders } from '../services/api'
 import EditFavorite from './EditFavorite'
 import DeleteFavorite from './DeleteFavorite'
 import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { useTheme } from '../ThemeContext'
 
 const FavoritesList = ({ selectedFolderId }) => {
+  const { isDarkMode } = useTheme()
   const [favorites, setFavorites] = useState([])
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -118,11 +121,11 @@ const FavoritesList = ({ selectedFolderId }) => {
     }))
   }
 
-  if (loading) return <div>Loading favorites...</div>
-  if (error) return <div className="text-red-500">{error}</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading favorites...</div>
+  if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>
 
   if (!favorites || favorites.length === 0) {
-    return <div>No favorites found in this folder</div>
+    return <div className="text-gray-600 dark:text-gray-300">No favorites found in this folder</div>
   }
 
   return (
@@ -132,10 +135,10 @@ const FavoritesList = ({ selectedFolderId }) => {
         console.log(`Folder path for favorite ${favorite.id}:`, folderPath)
         const isExpanded = expandedDescriptions[favorite.id]
         return (
-          <div key={favorite.id} className="bg-white p-4 rounded shadow">
+          <div key={favorite.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-xl font-semibold">
-                <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                   {favorite.title || 'Untitled'}
                 </a>
               </h3>
@@ -151,7 +154,7 @@ const FavoritesList = ({ selectedFolderId }) => {
               </div>
             </div>
             {folderPath.length > 0 && (
-              <div className="text-xs text-gray-500 mb-2 flex items-center flex-wrap">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center flex-wrap">
                 {folderPath.map((folder, index) => (
                   <React.Fragment key={folder.id}>
                     <span>{folder.name}</span>
@@ -160,7 +163,7 @@ const FavoritesList = ({ selectedFolderId }) => {
                 ))}
               </div>
             )}
-            <div className="text-gray-600 mb-2">
+            <div className="text-gray-600 dark:text-gray-300 mb-2">
               {isExpanded ? (
                 <p>{favorite.summary || 'No summary available'}</p>
               ) : (
@@ -173,7 +176,7 @@ const FavoritesList = ({ selectedFolderId }) => {
               {favorite.summary && favorite.summary.length > 100 && (
                 <button
                   onClick={() => toggleDescription(favorite.id)}
-                  className="text-blue-500 text-xs hover:underline focus:outline-none mt-1 flex items-center"
+                  className="text-blue-500 dark:text-blue-400 text-xs hover:underline focus:outline-none mt-1 flex items-center"
                 >
                   {isExpanded ? (
                     <>
@@ -191,12 +194,12 @@ const FavoritesList = ({ selectedFolderId }) => {
             </div>
             <div className="flex flex-wrap">
               {favorite.tags && favorite.tags.map(tag => (
-                <span key={tag.id} className="bg-gray-200 text-gray-700 px-2 py-1 rounded mr-2 mb-2 text-sm">
+                <span key={tag.id} className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded mr-2 mb-2 text-sm">
                   {tag.name}
                 </span>
               ))}
             </div>
-            <div className="text-sm text-gray-500 mt-2">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Created: {new Date(favorite.created_at).toLocaleDateString()}
             </div>
           </div>
@@ -217,8 +220,10 @@ import { getFolders, createFolder, deleteFolder, renameFolder } from '../service
 import { Folder, FolderOpen, Trash2, Edit, Plus, HelpCircle } from 'lucide-react'
 import CreateFolderModal from './CreateFolderModal'
 import HelpModal from './HelpModal'
+import { useTheme } from '../ThemeContext'
 
 const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
+  const { isDarkMode } = useTheme()
   const [folders, setFolders] = useState([])
   const [expandedFolders, setExpandedFolders] = useState({})
   const [loading, setLoading] = useState(true)
@@ -299,15 +304,15 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
 
     return (
       <div key={folder.id} className="ml-4 mb-2">
-        <div className={`flex items-center group ${isSelected ? 'bg-blue-100 rounded' : ''}`}>
+        <div className={`flex items-center group ${isSelected ? 'bg-blue-100 dark:bg-blue-900 rounded' : ''}`}>
           <button
             onClick={() => {
               onSelectFolder(folder.id, folder.name)
               if (hasChildren) toggleFolder(folder.id)
             }}
-            className={`flex items-center text-left hover:text-blue-600 py-1 px-2 ${isSelected ? 'font-semibold text-blue-600' : ''}`}
+            className={`flex items-center text-left hover:text-blue-600 dark:hover:text-blue-400 py-1 px-2 ${isSelected ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}`}
           >
-            {isExpanded ? <FolderOpen className="mr-2 text-blue-500" size={18} /> : <Folder className="mr-2 text-blue-500" size={18} />}
+            {isExpanded ? <FolderOpen className="mr-2 text-blue-500 dark:text-blue-400" size={18} /> : <Folder className="mr-2 text-blue-500 dark:text-blue-400" size={18} />}
             {editingFolder === folder.id ? (
               <input
                 type="text"
@@ -321,27 +326,27 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
                     setEditingFolder(null)
                   }
                 }}
-                className="border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                className="border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 bg-transparent text-gray-800 dark:text-gray-200"
                 autoFocus
               />
             ) : (
-              folder.name
+              <span className="text-gray-800 dark:text-gray-200">{folder.name}</span>
             )}
           </button>
           <div className="ml-2 hidden group-hover:flex">
             {!isRootFolder && (
               <>
-                <button onClick={() => setEditingFolder(folder.id)} className="text-gray-500 hover:text-blue-600 mr-2">
+                <button onClick={() => setEditingFolder(folder.id)} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mr-2">
                   <Edit size={16} />
                 </button>
-                <button onClick={() => handleDeleteFolder(folder.id)} className="text-gray-500 hover:text-red-600 mr-2">
+                <button onClick={() => handleDeleteFolder(folder.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 mr-2">
                   <Trash2 size={16} />
                 </button>
               </>
             )}
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="text-gray-500 hover:text-green-600"
+              className="text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
             >
               <Plus size={16} />
             </button>
@@ -356,17 +361,17 @@ const FolderExplorer = ({ onSelectFolder, selectedFolderId }) => {
     )
   }
 
-  if (loading) return <div>Loading folders...</div>
-  if (error) return <div className="text-red-500">{error}</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading folders...</div>
+  if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>
 
   return (
-    <div className="folder-explorer h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between h-14 px-4">
+    <div className="folder-explorer h-full flex flex-col bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+      <div className="mb-4 flex items-center justify-between h-14 px-4 bg-gray-100 dark:bg-gray-700">
         <h2 className="text-xl md:text-2xl font-bold flex items-center">
           Folders
           <button
             onClick={() => setIsHelpModalOpen(true)}
-            className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
           >
             <HelpCircle size={20} />
           </button>
@@ -400,108 +405,130 @@ File: src\App.jsx
 
 import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
-import { Home, ListTodo, Menu, X } from "lucide-react";
+import { Home, ListTodo, Menu, X, Sun, Moon } from "lucide-react";
+import { ThemeProvider, useTheme } from "./ThemeContext";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
 import TasksPage from "./components/TasksPage";
 
-function App() {
-    const [selectedFolderId, setSelectedFolderId] = useState(null);
-    const [selectedFolderName, setSelectedFolderName] = useState("All Favorites");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+function ThemeToggle() {
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  return (
+    <button
+      onClick={toggleDarkMode}
+      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+    >
+      {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+    </button>
+  );
+}
 
-    const handleFolderSelect = useCallback((folderId, folderName) => {
-        setSelectedFolderId(folderId === 1 ? null : folderId);
-        setSelectedFolderName(folderId === 1 ? "All Favorites" : folderName);
-    }, []);
+function AppContent() {
+  const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [selectedFolderName, setSelectedFolderName] = useState("All Favorites");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
+  const handleFolderSelect = useCallback((folderId, folderName) => {
+    setSelectedFolderId(folderId === 1 ? null : folderId);
+    setSelectedFolderName(folderId === 1 ? "All Favorites" : folderName);
+  }, []);
 
-    useEffect(() => {
-        if (isSidebarOpen) {
-            document.body.classList.add('sidebar-open');
-        } else {
-            document.body.classList.remove('sidebar-open');
-        }
-    }, [isSidebarOpen]);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-    return (
-        <Router>
-            <div className="flex flex-col h-screen bg-gray-100">
-                <nav className="bg-white text-gray-800 border-b border-gray-200 z-20">
-                    <ul className="flex justify-between h-14 items-center px-4">
-                        <li className="md:hidden">
-                            <button onClick={toggleSidebar} className="p-2">
-                                <Menu size={24} />
-                            </button>
-                        </li>
-                        <li className="flex">
-                            <NavLink
-                                to="/"
-                                className={({ isActive }) =>
-                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
-                                        isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <Home size={20} />
-                                <span className="hidden md:inline">Home</span>
-                            </NavLink>
-                            <NavLink
-                                to="/tasks"
-                                className={({ isActive }) =>
-                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
-                                        isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-                                    }`
-                                }
-                            >
-                                <ListTodo size={20} />
-                                <span className="hidden md:inline">Tasks</span>
-                            </NavLink>
-                        </li>
-                    </ul>
-                </nav>
-                <div className="flex flex-grow overflow-hidden">
-                    {/* Sidebar for mobile */}
-                    <div className={`md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                        <div className={`fixed inset-y-0 left-0 w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
-                                <h2 className="text-xl font-bold">Folders</h2>
-                                <button onClick={toggleSidebar} className="p-2">
-                                    <X size={24} />
-                                </button>
-                            </div>
-                            <div className="p-4 h-full overflow-auto">
-                                <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
-                            </div>
-                        </div>
-                    </div>
-                    {/* Sidebar for desktop */}
-                    <div className="hidden md:block md:w-1/4 bg-white shadow-md">
-                        <div className="p-4 h-full overflow-auto">
-                            <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
-                        </div>
-                    </div>
-                    <div className="w-full md:w-3/4 p-4 overflow-auto">
-                        <Routes>
-                            <Route
-                                path="/"
-                                element={
-                                    <>
-                                        <h1 className="text-3xl font-bold mb-4">{selectedFolderName}</h1>
-                                        <FavoritesList selectedFolderId={selectedFolderId} />
-                                    </>
-                                }
-                            />
-                            <Route path="/tasks" element={<TasksPage />} />
-                        </Routes>
-                    </div>
-                </div>
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [isSidebarOpen]);
+
+  return (
+    <Router>
+      <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
+        <nav className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 z-20">
+          <ul className="flex justify-between h-14 items-center px-4">
+            <li className="md:hidden">
+              <button onClick={toggleSidebar} className="p-2">
+                <Menu size={24} />
+              </button>
+            </li>
+            <li className="flex items-center">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 p-2 rounded transition-colors ${
+                    isActive ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300" : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`
+                }
+              >
+                <Home size={20} />
+                <span className="hidden md:inline">Home</span>
+              </NavLink>
+              <NavLink
+                to="/tasks"
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 p-2 rounded transition-colors ${
+                    isActive ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300" : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`
+                }
+              >
+                <ListTodo size={20} />
+                <span className="hidden md:inline">Tasks</span>
+              </NavLink>
+            </li>
+            <li className="hidden md:block">
+              <ThemeToggle />
+            </li>
+          </ul>
+        </nav>
+        <div className="flex flex-grow overflow-hidden">
+          {/* Sidebar for mobile */}
+          <div className={`md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className={`fixed inset-y-0 left-0 w-full bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+              <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold">Folders</h2>
+                <button onClick={toggleSidebar} className="p-2">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-4 h-full overflow-auto">
+                <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
+              </div>
             </div>
-        </Router>
-    );
+          </div>
+          {/* Sidebar for desktop */}
+          <div className="hidden md:block md:w-1/4 bg-white dark:bg-gray-800 overflow-hidden">
+            <FolderExplorer onSelectFolder={handleFolderSelect} selectedFolderId={selectedFolderId} />
+          </div>
+          <div className="w-full md:w-3/4 p-4 overflow-auto bg-gray-100 dark:bg-gray-900">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">{selectedFolderName}</h1>
+                    <FavoritesList selectedFolderId={selectedFolderId} />
+                  </>
+                }
+              />
+              <Route path="/tasks" element={<TasksPage />} />
+            </Routes>
+          </div>
+        </div>
+      </div>
+    </Router>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
 }
 
 export default App;
@@ -513,6 +540,14 @@ File: src\index.css
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+body {
+  @apply bg-gray-100 dark:bg-gray-900;
+}
+
+#root {
+  @apply h-screen;
+}
 
 .folder-explorer button {
   background: none;
@@ -573,6 +608,16 @@ File: index.html
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Favorites API Frontend</title>
+    <script>
+      // Check for dark mode preference
+      if (localStorage.getItem('darkMode') === 'true' || 
+          (!('darkMode' in localStorage) && 
+           window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
@@ -634,6 +679,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {},
   },
@@ -750,8 +796,10 @@ File: src\components\CreateFolderModal.jsx
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useTheme } from '../ThemeContext';
 
 const CreateFolderModal = ({ isOpen, onClose, onCreateFolder }) => {
+  const { isDarkMode } = useTheme();
   const [folderName, setFolderName] = useState('');
   const [folderDescription, setFolderDescription] = useState('');
 
@@ -767,16 +815,16 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateFolder }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Create New Folder</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Create New Folder</h2>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <X size={24} />
           </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="folderName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="folderName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Folder Name
             </label>
             <input
@@ -784,26 +832,26 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateFolder }) => {
               id="folderName"
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="folderDescription" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="folderDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Description (optional)
             </label>
             <textarea
               id="folderDescription"
               value={folderDescription}
               onChange={(e) => setFolderDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               rows="3"
             ></textarea>
           </div>
           <div className="flex justify-end">
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               Create Folder
             </button>
@@ -822,26 +870,29 @@ File: src\components\HelpModal.jsx
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { useTheme } from '../ThemeContext';
 
 const HelpModal = ({ isOpen, onClose }) => {
+  const { isDarkMode } = useTheme();
+  
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 max-w-full">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Folder Management Help</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Folder Management Help</h2>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <X size={24} />
           </button>
         </div>
-        <div className="space-y-4">
-          <p><strong>Creating a folder:</strong> Hover over any folder and click the + icon to create a new subfolder.</p>
-          <p><strong>Renaming a folder:</strong> Hover over a folder and click the pencil icon to rename it.</p>
-          <p><strong>Deleting a folder:</strong> Hover over a folder and click the trash icon to delete it.</p>
-          <p><strong>Expanding/Collapsing:</strong> Click on a folder name to expand or collapse its contents.</p>
-          <p><strong>Selecting a folder:</strong> Click on a folder name to select it and view its contents.</p>
-          <p><strong>Note:</strong> The root "Favorites" item cannot be renamed or deleted.</p>
+        <div className="space-y-4 text-gray-600 dark:text-gray-300">
+          <p><strong className="text-gray-800 dark:text-gray-200">Creating a folder:</strong> Hover over any folder and click the + icon to create a new subfolder.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Renaming a folder:</strong> Hover over a folder and click the pencil icon to rename it.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Deleting a folder:</strong> Hover over a folder and click the trash icon to delete it.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Expanding/Collapsing:</strong> Click on a folder name to expand or collapse its contents.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Selecting a folder:</strong> Click on a folder name to select it and view its contents.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Note:</strong> The root "Favorites" item cannot be renamed or deleted.</p>
         </div>
       </div>
     </div>
@@ -857,8 +908,10 @@ File: src\components\DeleteFavorite.jsx
 import React, { useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { deleteFavorite } from '../services/api';
+import { useTheme } from '../ThemeContext';
 
 const DeleteFavorite = ({ favorite, onDelete }) => {
+  const { isDarkMode } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -874,30 +927,30 @@ const DeleteFavorite = ({ favorite, onDelete }) => {
 
   return (
     <>
-      <button onClick={() => setIsDialogOpen(true)} className="text-gray-500 hover:text-red-600 focus:outline-none">
+      <button onClick={() => setIsDialogOpen(true)} className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 focus:outline-none">
         <Trash2 size={18} />
       </button>
       {isDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Delete Favorite</h2>
-              <button onClick={() => setIsDialogOpen(false)} className="text-gray-500 hover:text-gray-700">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Delete Favorite</h2>
+              <button onClick={() => setIsDialogOpen(false)} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                 <X size={24} />
               </button>
             </div>
-            <p className="mb-4">Are you sure you want to delete this favorite?</p>
-            <p className="mb-4 font-semibold">{favorite.title || 'Untitled'}</p>
+            <p className="mb-4 text-gray-600 dark:text-gray-300">Are you sure you want to delete this favorite?</p>
+            <p className="mb-4 font-semibold text-gray-800 dark:text-gray-200">{favorite.title || 'Untitled'}</p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setIsDialogOpen(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400"
               >
                 Delete
               </button>
@@ -918,8 +971,10 @@ File: src\components\EditFavorite.jsx
 import React, { useState } from 'react';
 import { X, Edit } from 'lucide-react';
 import { updateFavorite } from '../services/api';
+import { useTheme } from '../ThemeContext';
 
 const EditFavorite = ({ favorite, onClose, onUpdate }) => {
+  const { isDarkMode } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(favorite.title || '');
   const [summary, setSummary] = useState(favorite.summary || '');
@@ -938,7 +993,7 @@ const EditFavorite = ({ favorite, onClose, onUpdate }) => {
 
   if (!isEditing) {
     return (
-      <button onClick={() => setIsEditing(true)} className="text-gray-500 hover:text-blue-600 focus:outline-none">
+      <button onClick={() => setIsEditing(true)} className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">
         <Edit size={18} />
       </button>
     );
@@ -946,16 +1001,16 @@ const EditFavorite = ({ favorite, onClose, onUpdate }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Edit Favorite</h2>
-          <button onClick={() => setIsEditing(false)} className="text-gray-500 hover:text-gray-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Edit Favorite</h2>
+          <button onClick={() => setIsEditing(false)} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <X size={24} />
           </button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Title
             </label>
             <input
@@ -963,26 +1018,26 @@ const EditFavorite = ({ favorite, onClose, onUpdate }) => {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="summary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Summary
             </label>
             <textarea
               id="summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               rows="3"
             ></textarea>
           </div>
           <div className="flex justify-end">
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               Update Favorite
             </button>
@@ -994,6 +1049,105 @@ const EditFavorite = ({ favorite, onClose, onUpdate }) => {
 };
 
 export default EditFavorite;
+
+---
+
+File: TODO.md
+
+# Favorites API Frontend - Progress and Todo
+
+## Completed Tasks
+
+1. Initialized a new Node.js project
+2. Set up Vite with React
+3. Installed and configured Tailwind CSS
+4. Created the basic project structure
+5. Implemented the main layout with a sidebar for folders and a main content area
+6. Created a FolderExplorer component with expandable folder structure
+7. Implemented a FavoritesList component to display favorites as cards
+8. Set up basic API service functions for fetching folders and favorites
+9. Implemented folder selection and filtering of favorites by folder
+10. Added error handling and loading states for API calls
+11. Enhanced the Folders component:
+    - Implemented folder creation functionality
+    - Added folder deletion and renaming capabilities
+    - Improved the visual representation of the folder hierarchy
+12. Created a modal dialog for folder creation
+13. Added a help button with a modal dialog explaining folder management
+14. Ensured alignment with the OpenAPI specification for correct API usage
+
+## Next Steps
+
+1. **Refine the Folders component**
+   - [ ] Implement drag-and-drop functionality for reordering folders
+   - [x] Add visual feedback for folder actions (create, rename, delete)
+   - [ ] Implement folder search functionality
+
+2. **Enhance the Favorites component**
+   - [x] Implement favorite creation functionality
+   - [x] Add favorite editing and deletion capabilities
+   - [x] Implement a 'read more' feature for longer descriptions
+   - [ ] Add pagination or infinite scrolling for favorites list
+
+3. **Develop the Tags system**
+   - [ ] Create a dedicated Tags component for managing tags
+   - [ ] Implement tag filtering functionality
+   - [ ] Add the ability to create, edit, and delete tags
+   - [ ] Integrate tags with favorites (add/remove tags from favorites)
+
+4. **Implement state management**
+   - [ ] Choose and set up a state management solution (e.g., React Context, Redux)
+   - [ ] Implement global state management for favorites, folders, and tags
+
+5. **Add routing**
+   - [x] Set up client-side routing for different views (e.g., all favorites, folder view, tag view)
+   - [x] Implement breadcrumb navigation for folder hierarchy
+
+6. **Enhance UI/UX**
+   - [ ] Improve the overall design and user experience
+   - [ ] Add animations and transitions for a more polished feel
+   - [ ] Implement responsive design for mobile devices
+   - [ ] Add keyboard shortcuts for common actions
+
+7. **Implement search functionality**
+   - [ ] Add a search bar to filter favorites based on title, description, or tags
+   - [ ] Implement advanced search options (e.g., by date range, folder, tag combinations)
+
+8. **Add user authentication**
+   - [ ] Implement login and logout functionality
+   - [ ] Add user-specific data fetching and management
+   - [ ] Implement user settings and preferences
+
+9. **Performance Optimization**
+   - [ ] Implement lazy loading for folder and favorite content
+   - [ ] Optimize API calls with caching and debouncing
+   - [ ] Add virtual scrolling for large lists of favorites or folders
+
+10. **Testing**
+    - [ ] Write unit tests for components and utility functions
+    - [ ] Implement integration tests for API interactions
+    - [ ] Add end-to-end tests for critical user flows
+
+11. **Documentation**
+    - [ ] Create comprehensive README.md with setup instructions and project overview
+    - [ ] Add inline code documentation where necessary
+    - [ ] Create user documentation or help guides
+
+12. **Deployment and CI/CD**
+    - [ ] Set up a CI/CD pipeline for automated testing and deployment
+    - [ ] Configure production builds and optimization
+    - [ ] Implement error logging and monitoring for production
+
+## Getting Started
+
+To continue development:
+
+1. Clone the repository
+2. Run `npm install` to install dependencies
+3. Create a `.env` file based on `.env.example` and fill in the appropriate API URL
+4. Use `npm run dev` to start the development server
+
+Remember to commit your changes regularly and create feature branches for major additions.
 
 ---
 

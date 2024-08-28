@@ -1126,27 +1126,6 @@
                     }
                 }
             }
-        },
-        "/admin": {
-            "get": {
-                "tags": [
-                    "web"
-                ],
-                "summary": "Read Admin",
-                "operationId": "read_admin_admin_get",
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "text/html": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "components": {
