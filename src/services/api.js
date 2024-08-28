@@ -86,3 +86,25 @@ export const getTasks = async () => {
   }
   return response.json();
 };
+
+export const importFavorites = async (favorites) => {
+  const response = await fetch(`${API_BASE_URL}/favorites/import`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(favorites),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to import favorites');
+  }
+  return response.json();
+};
+
+export const exportFavorites = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites`);
+  if (!response.ok) {
+    throw new Error('Failed to export favorites');
+  }
+  return response.json();
+};

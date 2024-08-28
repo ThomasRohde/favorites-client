@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink } from "react-router-dom";
-import { Home, ListTodo, Menu, X, Sun, Moon } from "lucide-react";
+import { Home, ListTodo, Menu, X, Sun, Moon, Download, Upload } from "lucide-react";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
 import TasksPage from "./components/TasksPage";
+import ImportDialog from "./components/ImportDialog";
+import ExportDialog from "./components/ExportDialog";
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -19,11 +21,13 @@ function AppContent() {
     const [selectedFolderId, setSelectedFolderId] = useState(null);
     const [selectedFolderName, setSelectedFolderName] = useState("All Favorites");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+    const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
     const handleFolderSelect = useCallback((folderId, folderName) => {
         setSelectedFolderId(folderId === 1 ? null : folderId);
         setSelectedFolderName(folderId === 1 ? "All Favorites" : folderName);
-      }, []);
+    }, []);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -47,7 +51,7 @@ function AppContent() {
                                 <Menu size={24} />
                             </button>
                         </li>
-                        <li className="flex items-center">
+                        <li className="flex items-center space-x-2">
                             <NavLink
                                 to="/"
                                 className={({ isActive }) =>
@@ -74,6 +78,20 @@ function AppContent() {
                                 <ListTodo size={20} />
                                 <span className="hidden md:inline">Tasks</span>
                             </NavLink>
+                            <button
+                                onClick={() => setIsImportDialogOpen(true)}
+                                className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                <Upload size={20} />
+                                <span className="hidden md:inline">Import</span>
+                            </button>
+                            <button
+                                onClick={() => setIsExportDialogOpen(true)}
+                                className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                <Download size={20} />
+                                <span className="hidden md:inline">Export</span>
+                            </button>
                         </li>
                         <li className="hidden md:block">
                             <ThemeToggle />
@@ -130,6 +148,8 @@ function AppContent() {
                         </Routes>
                     </div>
                 </div>
+                <ImportDialog isOpen={isImportDialogOpen} onClose={() => setIsImportDialogOpen(false)} />
+                <ExportDialog isOpen={isExportDialogOpen} onClose={() => setIsExportDialogOpen(false)} />
             </div>
         </Router>
     );
