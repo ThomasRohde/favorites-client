@@ -5,7 +5,7 @@ import DeleteFavorite from './DeleteFavorite'
 import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 import { useTheme } from '../ThemeContext'
 
-const FavoritesList = ({ selectedFolderId }) => {
+const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
   const { isDarkMode } = useTheme()
   const [favorites, setFavorites] = useState([])
   const [folders, setFolders] = useState([])
@@ -113,7 +113,12 @@ const FavoritesList = ({ selectedFolderId }) => {
               <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center flex-wrap">
                 {folderPath.map((folder, index) => (
                   <React.Fragment key={folder.id}>
-                    <span>{folder.name}</span>
+                    <button
+                      onClick={() => onFolderSelect(folder.id, folder.name)}
+                      className="hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none focus:text-blue-500 dark:focus:text-blue-400 transition-colors duration-200"
+                    >
+                      {folder.name}
+                    </button>
                     {index < folderPath.length - 1 && <ChevronRight size={14} className="mx-1" />}
                   </React.Fragment>
                 ))}
