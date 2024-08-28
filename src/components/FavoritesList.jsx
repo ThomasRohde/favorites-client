@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getFavorites, getFolders } from '../services/api'
 import EditFavorite from './EditFavorite'
 import DeleteFavorite from './DeleteFavorite'
@@ -7,6 +8,7 @@ import { useTheme } from '../ThemeContext'
 
 const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
   const { isDarkMode } = useTheme()
+  const navigate = useNavigate()
   const [favorites, setFavorites] = useState([])
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -75,6 +77,10 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
       ...prev,
       [favoriteId]: !prev[favoriteId]
     }))
+  }
+
+  const handleTagClick = (tagName) => {
+    navigate(`/tag-search/${encodeURIComponent(tagName)}`)
   }
 
   if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading favorites...</div>
@@ -155,9 +161,13 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
             </div>
             <div className="flex flex-wrap">
               {favorite.tags && favorite.tags.map(tag => (
-                <span key={tag.id} className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded mr-2 mb-2 text-sm">
+                <button
+                  key={tag.id}
+                  onClick={() => handleTagClick(tag.name)}
+                  className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded mr-2 mb-2 text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
+                >
                   {tag.name}
-                </span>
+                </button>
               ))}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">

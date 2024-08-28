@@ -108,3 +108,12 @@ export const exportFavorites = async () => {
   }
   return response.json();
 };
+
+export const getFavoritesByFuzzyTag = async (tagQuery, skip = 0, limit = 100) => {
+  const response = await fetch(`${API_BASE_URL}/tags/fuzzy/${encodeURIComponent(tagQuery)}/favorites?skip=${skip}&limit=${limit}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch favorites for this tag query');
+  }
+  return response.json();
+};
