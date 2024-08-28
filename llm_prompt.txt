@@ -1,7 +1,7 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (45%), JavaScript (14%), JSON (10%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (45%), JavaScript (16%), JSON (10%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
 The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
@@ -43,21 +43,15 @@ When analyzing this project:
 File: src\components\FavoritesList.jsx
 
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getFavorites, getFolders } from '../services/api'
-import EditFavorite from './EditFavorite'
-import DeleteFavorite from './DeleteFavorite'
-import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
-import { useTheme } from '../ThemeContext'
+import FavoriteCard from './FavoriteCard'
+import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils'
 
 const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
-  const { isDarkMode } = useTheme()
-  const navigate = useNavigate()
   const [favorites, setFavorites] = useState([])
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [expandedDescriptions, setExpandedDescriptions] = useState({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,8 +61,6 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
           getFavorites(selectedFolderId),
           getFolders()
         ])
-        console.log('Fetched favorites:', favoritesData)
-        console.log('Fetched folders:', foldersData)
         setFavorites(favoritesData)
         setFolders(foldersData)
         setLoading(false)
@@ -109,22 +101,11 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
   };
 
   const handleUpdateFavorite = (updatedFavorite) => {
-    setFavorites(favorites.map(f => f.id === updatedFavorite.id ? updatedFavorite : f))
+    setFavorites(handleFavoriteUpdate(favorites, updatedFavorite))
   }
 
   const handleDeleteFavorite = (deletedFavoriteId) => {
-    setFavorites(favorites.filter(f => f.id !== deletedFavoriteId))
-  }
-
-  const toggleDescription = (favoriteId) => {
-    setExpandedDescriptions(prev => ({
-      ...prev,
-      [favoriteId]: !prev[favoriteId]
-    }))
-  }
-
-  const handleTagClick = (tagName) => {
-    navigate(`/tag-search/${encodeURIComponent(tagName)}`)
+    setFavorites(handleFavoriteDelete(favorites, deletedFavoriteId))
   }
 
   if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading favorites...</div>
@@ -138,86 +119,15 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {favorites.map(favorite => {
         const folderPath = getFolderPath(favorite.folder_id)
-        console.log(`Folder path for favorite ${favorite.id}:`, folderPath)
-        const isExpanded = expandedDescriptions[favorite.id]
         return (
-          <div key={favorite.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="text-xl font-semibold">
-                <a href={favorite.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {favorite.title || 'Untitled'}
-                </a>
-              </h3>
-              <div className="flex space-x-2">
-                <EditFavorite
-                  favorite={favorite}
-                  onUpdate={handleUpdateFavorite}
-                />
-                <DeleteFavorite
-                  favorite={favorite}
-                  onDelete={handleDeleteFavorite}
-                />
-              </div>
-            </div>
-            {folderPath.length > 0 && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center flex-wrap">
-                {folderPath.map((folder, index) => (
-                  <React.Fragment key={folder.id}>
-                    <button
-                      onClick={() => onFolderSelect(folder.id, folder.name)}
-                      className="hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none focus:text-blue-500 dark:focus:text-blue-400 transition-colors duration-200"
-                    >
-                      {folder.name}
-                    </button>
-                    {index < folderPath.length - 1 && <ChevronRight size={14} className="mx-1" />}
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
-            <div className="text-gray-600 dark:text-gray-300 mb-2">
-              {isExpanded ? (
-                <p>{favorite.summary || 'No summary available'}</p>
-              ) : (
-                <p>
-                  {favorite.summary
-                    ? `${favorite.summary.slice(0, 100)}${favorite.summary.length > 100 ? '...' : ''}`
-                    : 'No summary available'}
-                </p>
-              )}
-              {favorite.summary && favorite.summary.length > 100 && (
-                <button
-                  onClick={() => toggleDescription(favorite.id)}
-                  className="text-blue-500 dark:text-blue-400 text-xs hover:underline focus:outline-none mt-1 flex items-center"
-                >
-                  {isExpanded ? (
-                    <>
-                      <ChevronUp size={16} className="mr-1" />
-                      Show less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={16} className="mr-1" />
-                      Show more
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-            <div className="flex flex-wrap">
-              {favorite.tags && favorite.tags.map(tag => (
-                <button
-                  key={tag.id}
-                  onClick={() => handleTagClick(tag.name)}
-                  className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded mr-2 mb-2 text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
-                >
-                  {tag.name}
-                </button>
-              ))}
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Created: {new Date(favorite.created_at).toLocaleDateString()}
-            </div>
-          </div>
+          <FavoriteCard
+            key={favorite.id}
+            favorite={favorite}
+            onUpdate={handleUpdateFavorite}
+            onDelete={handleDeleteFavorite}
+            onFolderSelect={onFolderSelect}
+            folderPath={folderPath}
+          />
         )
       })}
     </div>
