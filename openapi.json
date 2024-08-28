@@ -1,1 +1,1756 @@
-{"openapi":"3.1.0","info":{"title":"Intelligent Favorites Extension API","description":"\n        This API provides endpoints for managing an intelligent favorites system. \n        It allows users to create, retrieve, update, and delete favorites, folders, and tags. \n        The system also provides intelligent features such as automatic summarization, \n        tag suggestion, and folder recommendation.\n\n        Key features:\n        * Manage favorites with automatic content summarization\n        * Organize favorites into folders\n        * Tag favorites for easy categorization and retrieval\n        * Intelligent tag and folder suggestions based on content analysis\n        * Search functionality for favorites and tags\n        * Asynchronous processing for time-consuming tasks\n        ","version":"1.0.0"},"paths":{"/api/favorites/":{"post":{"tags":["favorites"],"summary":"Create Favorite","operationId":"create_favorite_api_favorites__post","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FavoriteCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"object","additionalProperties":{"type":"string"},"title":"Response Create Favorite Api Favorites  Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["favorites"],"summary":"Read Favorites","operationId":"read_favorites_api_favorites__get","parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Favorite"},"title":"Response Read Favorites Api Favorites  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["favorites"],"summary":"Delete All Favorites","operationId":"delete_all_favorites_api_favorites__delete","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"object","additionalProperties":{"type":"string"},"title":"Response Delete All Favorites Api Favorites  Delete"}}}}}}},"/api/favorites/task/{task_id}":{"get":{"tags":["favorites"],"summary":"Get Task Status","operationId":"get_task_status_api_favorites_task__task_id__get","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TaskStatusDetail"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/favorites/tasks":{"get":{"tags":["favorites"],"summary":"Get Tasks","operationId":"get_tasks_api_favorites_tasks_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/TaskStatus"},"type":"array","title":"Response Get Tasks Api Favorites Tasks Get"}}}}}}},"/api/favorites/{favorite_id}":{"get":{"tags":["favorites"],"summary":"Read Favorite","operationId":"read_favorite_api_favorites__favorite_id__get","parameters":[{"name":"favorite_id","in":"path","required":true,"schema":{"type":"integer","title":"Favorite Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Favorite"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"put":{"tags":["favorites"],"summary":"Update Favorite","operationId":"update_favorite_api_favorites__favorite_id__put","parameters":[{"name":"favorite_id","in":"path","required":true,"schema":{"type":"integer","title":"Favorite Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FavoriteUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Favorite"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["favorites"],"summary":"Delete Favorite","operationId":"delete_favorite_api_favorites__favorite_id__delete","parameters":[{"name":"favorite_id","in":"path","required":true,"schema":{"type":"integer","title":"Favorite Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Favorite"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/favorites/suggest-tags":{"post":{"tags":["favorites"],"summary":"Suggest Tags","operationId":"suggest_tags_api_favorites_suggest_tags_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FavoriteCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"type":"string"},"type":"array","title":"Response Suggest Tags Api Favorites Suggest Tags Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/favorites/suggest-folder":{"post":{"tags":["favorites"],"summary":"Suggest Folder","operationId":"suggest_folder_api_favorites_suggest_folder_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FavoriteCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"integer","title":"Response Suggest Folder Api Favorites Suggest Folder Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/favorites/import":{"post":{"tags":["favorites"],"summary":"Import Favorites","operationId":"import_favorites_api_favorites_import_post","requestBody":{"content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/FavoriteImport"},"type":"array","title":"Favorites"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object","title":"Response Import Favorites Api Favorites Import Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/folders/":{"get":{"tags":["folders"],"summary":"Read Folders","operationId":"read_folders_api_folders__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"type":"object"},"type":"array","title":"Response Read Folders Api Folders  Get"}}}}}},"post":{"tags":["folders"],"summary":"Create Folder","operationId":"create_folder_api_folders__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FolderCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Folder"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/folders/{folder_id}/favorites":{"get":{"tags":["folders"],"summary":"Get Folder Favorites","operationId":"get_folder_favorites_api_folders__folder_id__favorites_get","parameters":[{"name":"folder_id","in":"path","required":true,"schema":{"type":"integer","title":"Folder Id"}},{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Favorite"},"title":"Response Get Folder Favorites Api Folders  Folder Id  Favorites Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/folders/{folder_id}":{"put":{"tags":["folders"],"summary":"Update Folder","operationId":"update_folder_api_folders__folder_id__put","parameters":[{"name":"folder_id","in":"path","required":true,"schema":{"type":"integer","title":"Folder Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/FolderCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Folder"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["folders"],"summary":"Delete Folder","operationId":"delete_folder_api_folders__folder_id__delete","parameters":[{"name":"folder_id","in":"path","required":true,"schema":{"type":"integer","title":"Folder Id"}},{"name":"move_to_parent","in":"query","required":false,"schema":{"type":"boolean","default":false,"title":"Move To Parent"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Folder"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/folders/{folder_id}/move":{"post":{"tags":["folders"],"summary":"Move Folder","operationId":"move_folder_api_folders__folder_id__move_post","parameters":[{"name":"folder_id","in":"path","required":true,"schema":{"type":"integer","title":"Folder Id"}},{"name":"new_parent_id","in":"query","required":true,"schema":{"type":"integer","title":"New Parent Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Folder"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/":{"post":{"tags":["tags"],"summary":"Create Tag","operationId":"create_tag_api_tags__post","requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TagCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Tag"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["tags"],"summary":"Read Tags","operationId":"read_tags_api_tags__get","parameters":[{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Tag"},"title":"Response Read Tags Api Tags  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/{tag_id}":{"get":{"tags":["tags"],"summary":"Read Tag","operationId":"read_tag_api_tags__tag_id__get","parameters":[{"name":"tag_id","in":"path","required":true,"schema":{"type":"integer","title":"Tag Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Tag"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"put":{"tags":["tags"],"summary":"Update Tag","operationId":"update_tag_api_tags__tag_id__put","parameters":[{"name":"tag_id","in":"path","required":true,"schema":{"type":"integer","title":"Tag Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TagCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Tag"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["tags"],"summary":"Delete Tag","operationId":"delete_tag_api_tags__tag_id__delete","parameters":[{"name":"tag_id","in":"path","required":true,"schema":{"type":"integer","title":"Tag Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Tag"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/search/{query}":{"get":{"tags":["tags"],"summary":"Search Tags","operationId":"search_tags_api_tags_search__query__get","parameters":[{"name":"query","in":"path","required":true,"schema":{"type":"string","title":"Query"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Tag"},"title":"Response Search Tags Api Tags Search  Query  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/{tag_id}/favorites":{"get":{"tags":["tags"],"summary":"Get Tag Favorites","operationId":"get_tag_favorites_api_tags__tag_id__favorites_get","parameters":[{"name":"tag_id","in":"path","required":true,"schema":{"type":"integer","title":"Tag Id"}},{"name":"skip","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Favorite"},"title":"Response Get Tag Favorites Api Tags  Tag Id  Favorites Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/suggest":{"post":{"tags":["tags"],"summary":"Suggest Tags","operationId":"suggest_tags_api_tags_suggest_post","parameters":[{"name":"content","in":"query","required":true,"schema":{"type":"string","title":"Content"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"type":"string"},"title":"Response Suggest Tags Api Tags Suggest Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/popular":{"get":{"tags":["tags"],"summary":"Get Popular Tags","operationId":"get_popular_tags_api_tags_popular_get","parameters":[{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":10,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Tag"},"title":"Response Get Popular Tags Api Tags Popular Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/tags/fuzzy/{tag_query}/favorites":{"get":{"tags":["tags"],"summary":"Get Favorites By Fuzzy Tag","operationId":"get_favorites_by_fuzzy_tag_api_tags_fuzzy__tag_query__favorites_get","parameters":[{"name":"tag_query","in":"path","required":true,"schema":{"type":"string","title":"Tag Query"}},{"name":"skip","in":"query","required":false,"schema":{"type":"integer","minimum":0,"default":0,"title":"Skip"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","maximum":100,"minimum":1,"default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Favorite"},"title":"Response Get Favorites By Fuzzy Tag Api Tags Fuzzy  Tag Query  Favorites Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/":{"get":{"tags":["root"],"summary":"Root","operationId":"root__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}}},"components":{"schemas":{"Favorite":{"properties":{"url":{"type":"string","maxLength":2083,"minLength":1,"format":"uri","title":"Url"},"title":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Title"},"summary":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Summary"},"id":{"type":"integer","title":"Id"},"folder_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Folder Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"type":"string","format":"date-time","title":"Updated At"},"tags":{"items":{"$ref":"#/components/schemas/Tag"},"type":"array","title":"Tags","default":[]}},"type":"object","required":["url","id","folder_id","created_at","updated_at"],"title":"Favorite"},"FavoriteCreate":{"properties":{"url":{"type":"string","maxLength":2083,"minLength":1,"format":"uri","title":"Url"},"title":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Title"},"summary":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Summary"},"folder_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Folder Id"},"tags":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"title":"Tags"},"metadata":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Metadata"}},"type":"object","required":["url"],"title":"FavoriteCreate"},"FavoriteImport":{"properties":{"url":{"type":"string","maxLength":2083,"minLength":1,"format":"uri","title":"Url"},"title":{"type":"string","title":"Title"},"metadata":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Metadata"}},"type":"object","required":["url","title"],"title":"FavoriteImport"},"FavoriteUpdate":{"properties":{"title":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Title"},"summary":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Summary"},"folder_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Folder Id"},"tags":{"anyOf":[{"items":{"type":"string"},"type":"array"},{"type":"null"}],"title":"Tags"}},"type":"object","title":"FavoriteUpdate"},"Folder":{"properties":{"name":{"type":"string","title":"Name"},"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"id":{"type":"integer","title":"Id"},"parent_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Parent Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"type":"string","format":"date-time","title":"Updated At"}},"type":"object","required":["name","id","parent_id","created_at","updated_at"],"title":"Folder"},"FolderCreate":{"properties":{"name":{"type":"string","title":"Name"},"description":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Description"},"parent_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Parent Id"}},"type":"object","required":["name"],"title":"FolderCreate"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"Tag":{"properties":{"name":{"type":"string","title":"Name"},"id":{"type":"integer","title":"Id"}},"type":"object","required":["name","id"],"title":"Tag"},"TagCreate":{"properties":{"name":{"type":"string","title":"Name"}},"type":"object","required":["name"],"title":"TagCreate"},"TaskStatus":{"properties":{"id":{"type":"string","title":"Id"},"name":{"type":"string","title":"Name"},"status":{"type":"string","title":"Status"},"progress":{"type":"string","title":"Progress"}},"type":"object","required":["id","name","status","progress"],"title":"TaskStatus"},"TaskStatusDetail":{"properties":{"id":{"type":"string","title":"Id"},"name":{"type":"string","title":"Name"},"status":{"type":"string","title":"Status"},"progress":{"type":"string","title":"Progress"},"result":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Result"}},"type":"object","required":["id","name","status","progress"],"title":"TaskStatusDetail"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}},"tags":[{"name":"favorites","description":"Operations with favorites, including creation, retrieval, update, and deletion."},{"name":"folders","description":"Manage folders for organizing favorites, including creation, retrieval, update, and deletion."},{"name":"tags","description":"Manage tags for categorizing favorites, including creation, retrieval, update, and deletion."}]}
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Intelligent Favorites Extension API",
+        "description": "\n        This API provides endpoints for managing an intelligent favorites system. \n        It allows users to create, retrieve, update, and delete favorites, folders, and tags. \n        The system also provides intelligent features such as automatic summarization, \n        tag suggestion, and folder recommendation.\n\n        Key features:\n        * Manage favorites with automatic content summarization\n        * Organize favorites into folders\n        * Tag favorites for easy categorization and retrieval\n        * Intelligent tag and folder suggestions based on content analysis\n        * Search functionality for favorites and tags\n        * Asynchronous processing for time-consuming tasks\n        ",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/favorites/": {
+            "post": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Create Favorite",
+                "operationId": "create_favorite_api_favorites__post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FavoriteCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Create Favorite Api Favorites  Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Read Favorites",
+                "operationId": "read_favorites_api_favorites__get",
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Favorite"
+                                    },
+                                    "title": "Response Read Favorites Api Favorites  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Delete All Favorites",
+                "operationId": "delete_all_favorites_api_favorites__delete",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Delete All Favorites Api Favorites  Delete"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/task/{task_id}": {
+            "get": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Get Task Status",
+                "operationId": "get_task_status_api_favorites_task__task_id__get",
+                "parameters": [
+                    {
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Task Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskStatusDetail"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/tasks": {
+            "get": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Get Tasks",
+                "operationId": "get_tasks_api_favorites_tasks_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/TaskStatus"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Get Tasks Api Favorites Tasks Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/{favorite_id}": {
+            "get": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Read Favorite",
+                "operationId": "read_favorite_api_favorites__favorite_id__get",
+                "parameters": [
+                    {
+                        "name": "favorite_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Favorite Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Favorite"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Update Favorite",
+                "operationId": "update_favorite_api_favorites__favorite_id__put",
+                "parameters": [
+                    {
+                        "name": "favorite_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Favorite Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FavoriteUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Favorite"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Delete Favorite",
+                "operationId": "delete_favorite_api_favorites__favorite_id__delete",
+                "parameters": [
+                    {
+                        "name": "favorite_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Favorite Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Favorite"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/suggest-tags": {
+            "post": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Suggest Tags",
+                "operationId": "suggest_tags_api_favorites_suggest_tags_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FavoriteCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Suggest Tags Api Favorites Suggest Tags Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/suggest-folder": {
+            "post": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Suggest Folder",
+                "operationId": "suggest_folder_api_favorites_suggest_folder_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FavoriteCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "title": "Response Suggest Folder Api Favorites Suggest Folder Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/favorites/import": {
+            "post": {
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Import Favorites",
+                "operationId": "import_favorites_api_favorites_import_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/FavoriteImport"
+                                },
+                                "type": "array",
+                                "title": "Favorites"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object",
+                                    "title": "Response Import Favorites Api Favorites Import Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/folders/": {
+            "get": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Read Folders",
+                "operationId": "read_folders_api_folders__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "type": "object"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Read Folders Api Folders  Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Create Folder",
+                "operationId": "create_folder_api_folders__post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FolderCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Folder"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/folders/{folder_id}/favorites": {
+            "get": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Get Folder Favorites",
+                "operationId": "get_folder_favorites_api_folders__folder_id__favorites_get",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Folder Id"
+                        }
+                    },
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Favorite"
+                                    },
+                                    "title": "Response Get Folder Favorites Api Folders  Folder Id  Favorites Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/folders/{folder_id}": {
+            "put": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Update Folder",
+                "operationId": "update_folder_api_folders__folder_id__put",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Folder Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FolderCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Folder"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Delete Folder",
+                "operationId": "delete_folder_api_folders__folder_id__delete",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Folder Id"
+                        }
+                    },
+                    {
+                        "name": "move_to_parent",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "Move To Parent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Folder"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/folders/{folder_id}/move": {
+            "post": {
+                "tags": [
+                    "folders"
+                ],
+                "summary": "Move Folder",
+                "operationId": "move_folder_api_folders__folder_id__move_post",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Folder Id"
+                        }
+                    },
+                    {
+                        "name": "new_parent_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "New Parent Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Folder"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/": {
+            "post": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Create Tag",
+                "operationId": "create_tag_api_tags__post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TagCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Read Tags",
+                "operationId": "read_tags_api_tags__get",
+                "parameters": [
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tag"
+                                    },
+                                    "title": "Response Read Tags Api Tags  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/{tag_id}": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Read Tag",
+                "operationId": "read_tag_api_tags__tag_id__get",
+                "parameters": [
+                    {
+                        "name": "tag_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Tag Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Update Tag",
+                "operationId": "update_tag_api_tags__tag_id__put",
+                "parameters": [
+                    {
+                        "name": "tag_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Tag Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TagCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Delete Tag",
+                "operationId": "delete_tag_api_tags__tag_id__delete",
+                "parameters": [
+                    {
+                        "name": "tag_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Tag Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Tag"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/search/{query}": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Search Tags",
+                "operationId": "search_tags_api_tags_search__query__get",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Query"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tag"
+                                    },
+                                    "title": "Response Search Tags Api Tags Search  Query  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/{tag_id}/favorites": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Get Tag Favorites",
+                "operationId": "get_tag_favorites_api_tags__tag_id__favorites_get",
+                "parameters": [
+                    {
+                        "name": "tag_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Tag Id"
+                        }
+                    },
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Favorite"
+                                    },
+                                    "title": "Response Get Tag Favorites Api Tags  Tag Id  Favorites Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/suggest": {
+            "post": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Suggest Tags",
+                "operationId": "suggest_tags_api_tags_suggest_post",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Content"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Suggest Tags Api Tags Suggest Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/popular": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Get Popular Tags",
+                "operationId": "get_popular_tags_api_tags_popular_get",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tag"
+                                    },
+                                    "title": "Response Get Popular Tags Api Tags Popular Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tags/fuzzy/{tag_query}/favorites": {
+            "get": {
+                "tags": [
+                    "tags"
+                ],
+                "summary": "Get Favorites By Fuzzy Tag",
+                "operationId": "get_favorites_by_fuzzy_tag_api_tags_fuzzy__tag_query__favorites_get",
+                "parameters": [
+                    {
+                        "name": "tag_query",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Tag Query"
+                        }
+                    },
+                    {
+                        "name": "skip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0,
+                            "title": "Skip"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Favorite"
+                                    },
+                                    "title": "Response Get Favorites By Fuzzy Tag Api Tags Fuzzy  Tag Query  Favorites Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "tags": [
+                    "root"
+                ],
+                "summary": "Root",
+                "operationId": "root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Favorite": {
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "maxLength": 2083,
+                        "minLength": 1,
+                        "format": "uri",
+                        "title": "Url"
+                    },
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Summary"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "folder_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Folder Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    },
+                    "tags": {
+                        "items": {
+                            "$ref": "#/components/schemas/Tag"
+                        },
+                        "type": "array",
+                        "title": "Tags",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "url",
+                    "id",
+                    "folder_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "Favorite"
+            },
+            "FavoriteCreate": {
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "maxLength": 2083,
+                        "minLength": 1,
+                        "format": "uri",
+                        "title": "Url"
+                    },
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Summary"
+                    },
+                    "folder_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Folder Id"
+                    },
+                    "tags": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tags"
+                    },
+                    "metadata": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Metadata"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "title": "FavoriteCreate"
+            },
+            "FavoriteImport": {
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "maxLength": 2083,
+                        "minLength": 1,
+                        "format": "uri",
+                        "title": "Url"
+                    },
+                    "title": {
+                        "type": "string",
+                        "title": "Title"
+                    },
+                    "metadata": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Metadata"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "url",
+                    "title"
+                ],
+                "title": "FavoriteImport"
+            },
+            "FavoriteUpdate": {
+                "properties": {
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "summary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Summary"
+                    },
+                    "folder_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Folder Id"
+                    },
+                    "tags": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tags"
+                    }
+                },
+                "type": "object",
+                "title": "FavoriteUpdate"
+            },
+            "Folder": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "parent_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Parent Id"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Updated At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "id",
+                    "parent_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "Folder"
+            },
+            "FolderCreate": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "parent_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Parent Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "FolderCreate"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "Tag": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "id"
+                ],
+                "title": "Tag"
+            },
+            "TagCreate": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "TagCreate"
+            },
+            "TaskStatus": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "progress": {
+                        "type": "string",
+                        "title": "Progress"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "status",
+                    "progress"
+                ],
+                "title": "TaskStatus"
+            },
+            "TaskStatusDetail": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "progress": {
+                        "type": "string",
+                        "title": "Progress"
+                    },
+                    "result": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Result"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "status",
+                    "progress"
+                ],
+                "title": "TaskStatusDetail"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "favorites",
+            "description": "Operations with favorites, including creation, retrieval, update, and deletion."
+        },
+        {
+            "name": "folders",
+            "description": "Manage folders for organizing favorites, including creation, retrieval, update, and deletion."
+        },
+        {
+            "name": "tags",
+            "description": "Manage tags for categorizing favorites, including creation, retrieval, update, and deletion."
+        }
+    ]
+}
