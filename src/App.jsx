@@ -24,10 +24,12 @@ function AppContent() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+    const { isDarkMode } = useTheme();
 
     const handleFolderSelect = useCallback((folderId, folderName) => {
         setSelectedFolderId(folderId === 1 ? null : folderId);
         setSelectedFolderName(folderId === 1 ? "All Favorites" : folderName);
+        setIsSidebarOpen(false); // Close sidebar on mobile after selection
     }, []);
 
     const toggleSidebar = () => {
@@ -94,7 +96,7 @@ function AppContent() {
                                 <span className="hidden md:inline">Export</span>
                             </button>
                         </li>
-                        <li className="hidden md:block">
+                        <li>
                             <ThemeToggle />
                         </li>
                     </ul>
@@ -111,9 +113,8 @@ function AppContent() {
                                 isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                             }`}
                         >
-                            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200 dark:border-gray-700">
-                                <h2 className="text-xl font-bold">Folders</h2>
-                                <button onClick={toggleSidebar} className="p-2">
+                            <div className="flex items-center justify-end h-14 px-4 border-b border-gray-200 dark:border-gray-700">
+                                <button onClick={toggleSidebar} className="p-2 text-gray-600 dark:text-gray-300">
                                     <X size={24} />
                                 </button>
                             </div>
