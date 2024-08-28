@@ -82,14 +82,14 @@ function AppContent() {
                                 onClick={() => setIsImportDialogOpen(true)}
                                 className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
-                                <Upload size={20} />
+                                <Download size={20} />
                                 <span className="hidden md:inline">Import</span>
                             </button>
                             <button
                                 onClick={() => setIsExportDialogOpen(true)}
                                 className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
-                                <Download size={20} />
+                                <Upload size={20} />
                                 <span className="hidden md:inline">Export</span>
                             </button>
                         </li>
