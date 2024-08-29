@@ -42,7 +42,7 @@ When analyzing this project:
 
 File: src\components\FavoritesList.jsx
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { getFavorites, getFolders } from '../services/api'
 import FavoriteCard from './FavoriteCard'
 import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils'
@@ -52,27 +52,79 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
+  const loader = useRef(null)
+
+  const loadMoreFavorites = useCallback(async () => {
+    if (loading) return
+    setLoading(true)
+    try {
+      const newFavorites = await getFavorites(selectedFolderId, page * 100, 100)
+      if (newFavorites.length === 0) {
+        setHasMore(false)
+      } else {
+        setFavorites(prevFavorites => [...prevFavorites, ...newFavorites])
+        setPage(prevPage => prevPage + 1)
+      }
+    } catch (err) {
+      console.error('Error fetching more favorites:', err)
+      setError('Failed to fetch more favorites')
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedFolderId, page, loading])
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       setLoading(true)
+      setFavorites([])
+      setPage(0)
+      setHasMore(true)
       try {
         const [favoritesData, foldersData] = await Promise.all([
-          getFavorites(selectedFolderId),
+          getFavorites(selectedFolderId, 0, 100),
           getFolders()
         ])
         setFavorites(favoritesData)
         setFolders(foldersData)
-        setLoading(false)
+        setPage(1)
+        setHasMore(favoritesData.length === 100)
       } catch (err) {
-        console.error('Error fetching data:', err)
+        console.error('Error fetching initial data:', err)
         setError('Failed to fetch data')
+      } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
+    fetchInitialData()
   }, [selectedFolderId])
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '20px',
+      threshold: 1.0
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      const target = entries[0]
+      if (target.isIntersecting && hasMore) {
+        loadMoreFavorites()
+      }
+    }, options)
+
+    if (loader.current) {
+      observer.observe(loader.current)
+    }
+
+    return () => {
+      if (loader.current) {
+        observer.unobserve(loader.current)
+      }
+    }
+  }, [loadMoreFavorites, hasMore])
 
   const findFolderRecursive = (folders, id) => {
     for (let folder of folders) {
@@ -108,28 +160,28 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
     setFavorites(handleFavoriteDelete(favorites, deletedFavoriteId))
   }
 
-  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading favorites...</div>
   if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>
 
-  if (!favorites || favorites.length === 0) {
-    return <div className="text-gray-600 dark:text-gray-300">No favorites found in this folder</div>
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {favorites.map(favorite => {
-        const folderPath = getFolderPath(favorite.folder_id)
-        return (
-          <FavoriteCard
-            key={favorite.id}
-            favorite={favorite}
-            onUpdate={handleUpdateFavorite}
-            onDelete={handleDeleteFavorite}
-            onFolderSelect={onFolderSelect}
-            folderPath={folderPath}
-          />
-        )
-      })}
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {favorites.map(favorite => {
+          const folderPath = getFolderPath(favorite.folder_id)
+          return (
+            <FavoriteCard
+              key={favorite.id}
+              favorite={favorite}
+              onUpdate={handleUpdateFavorite}
+              onDelete={handleDeleteFavorite}
+              onFolderSelect={onFolderSelect}
+              folderPath={folderPath}
+            />
+          )
+        })}
+      </div>
+      {loading && <div className="text-center mt-4">Loading more favorites...</div>}
+      {!loading && hasMore && <div ref={loader} className="h-10" />}
+      {!hasMore && <div className="text-center mt-4">No more favorites to load</div>}
     </div>
   )
 }
@@ -679,10 +731,12 @@ export const getFolders = async () => {
   return response.json();
 };
 
-export const getFavorites = async (folderId = null) => {
-  const url = folderId 
+export const getFavorites = async (folderId = null, skip = 0, limit = 50) => {
+  const url = new URL(folderId 
     ? `${API_BASE_URL}/folders/${folderId}/favorites`
-    : `${API_BASE_URL}/favorites`;
+    : `${API_BASE_URL}/favorites`);
+  url.searchParams.append('skip', skip);
+  url.searchParams.append('limit', limit);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch favorites');
@@ -785,6 +839,16 @@ export const getFavoritesByFuzzyTag = async (tagQuery, skip = 0, limit = 100) =>
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.detail || 'Failed to fetch favorites for this tag query');
+  }
+  return response.json();
+};
+
+export const restartImport = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites/restart-import`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to restart import');
   }
   return response.json();
 };

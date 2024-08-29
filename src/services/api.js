@@ -8,10 +8,12 @@ export const getFolders = async () => {
   return response.json();
 };
 
-export const getFavorites = async (folderId = null) => {
-  const url = folderId 
+export const getFavorites = async (folderId = null, skip = 0, limit = 50) => {
+  const url = new URL(folderId 
     ? `${API_BASE_URL}/folders/${folderId}/favorites`
-    : `${API_BASE_URL}/favorites`;
+    : `${API_BASE_URL}/favorites`);
+  url.searchParams.append('skip', skip);
+  url.searchParams.append('limit', limit);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch favorites');
@@ -114,6 +116,16 @@ export const getFavoritesByFuzzyTag = async (tagQuery, skip = 0, limit = 100) =>
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.detail || 'Failed to fetch favorites for this tag query');
+  }
+  return response.json();
+};
+
+export const restartImport = async () => {
+  const response = await fetch(`${API_BASE_URL}/favorites/restart-import`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to restart import');
   }
   return response.json();
 };
