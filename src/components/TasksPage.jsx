@@ -22,6 +22,12 @@ const TasksPage = () => {
 
   useEffect(() => {
     fetchTasks();
+
+    // Set up polling every 5 seconds
+    const pollInterval = setInterval(fetchTasks, 5000);
+
+    // Clean up function to clear the interval when the component unmounts
+    return () => clearInterval(pollInterval);
   }, []);
 
   const handleRestartImport = async () => {

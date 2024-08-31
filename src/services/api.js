@@ -129,3 +129,14 @@ export const restartImport = async () => {
   }
   return response.json();
 };
+
+export const vectorSearchFavorites = async (query, limit = 10) => {
+  const url = new URL(`${API_BASE_URL}/favorites/search/vector`);
+  url.searchParams.append('query', query);
+  url.searchParams.append('limit', limit);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to perform vector search');
+  }
+  return response.json();
+};
