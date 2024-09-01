@@ -10,6 +10,7 @@ import ImportDialog from "./components/ImportDialog";
 import ExportDialog from "./components/ExportDialog";
 import SearchPage from "./components/SearchPage";
 import TagsPage from "./components/TagsPage";
+import SettingsDialog from './components/SettingsDialog';
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -126,6 +127,7 @@ function AppContent() {
                         </li>
                         <li>
                             <ThemeToggle />
+                            <SettingsDialog />
                         </li>
                     </ul>
                 </nav>

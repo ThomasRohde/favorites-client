@@ -1,7 +1,7 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (50%), JavaScript (15%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (51%), JavaScript (14%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
 The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
@@ -401,6 +401,7 @@ import ImportDialog from "./components/ImportDialog";
 import ExportDialog from "./components/ExportDialog";
 import SearchPage from "./components/SearchPage";
 import TagsPage from "./components/TagsPage";
+import SettingsDialog from './components/SettingsDialog';
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -517,6 +518,7 @@ function AppContent() {
                         </li>
                         <li>
                             <ThemeToggle />
+                            <SettingsDialog />
                         </li>
                     </ul>
                 </nav>
@@ -923,6 +925,22 @@ export const createTag = async (name) => {
   });
   if (!response.ok) {
     throw new Error('Failed to create tag');
+  }
+  return response.json();
+};
+
+export const resetDatabase = async () => {
+  const response = await fetch(`${API_BASE_URL}/reset/`, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error('Failed to reset database');
+  }
+  return response.json();
+};
+
+export const reindexDatabase = async () => {
+  const response = await fetch(`${API_BASE_URL}/reindex/?local_kw=true`, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error('Failed to reindex database');
   }
   return response.json();
 };

@@ -162,3 +162,19 @@ export const createTag = async (name) => {
   }
   return response.json();
 };
+
+export const resetDatabase = async () => {
+  const response = await fetch(`${API_BASE_URL}/reset/`, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error('Failed to reset database');
+  }
+  return response.json();
+};
+
+export const reindexDatabase = async () => {
+  const response = await fetch(`${API_BASE_URL}/reindex/?local_kw=true`, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error('Failed to reindex database');
+  }
+  return response.json();
+};
