@@ -10,7 +10,8 @@ import ImportDialog from "./components/ImportDialog";
 import ExportDialog from "./components/ExportDialog";
 import SearchPage from "./components/SearchPage";
 import TagsPage from "./components/TagsPage";
-import SettingsDialog from './components/SettingsDialog';
+import SettingsDialog from "./components/SettingsDialog";
+import { getFolders } from "./services/api";
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -46,6 +47,13 @@ function AppContent() {
             document.body.classList.remove("sidebar-open");
         }
     }, [isSidebarOpen]);
+
+    const handleDatabaseUpdate = useCallback(() => {
+        // Refresh necessary data
+        setSelectedFolderId(null);
+        setSelectedFolderName("All Favorites");
+        // You might want to refresh other data here as needed
+    }, []);
 
     return (
         <Router>
@@ -125,9 +133,9 @@ function AppContent() {
                                 <span className="hidden md:inline">Export</span>
                             </button>
                         </li>
-                        <li>
+                        <li className="flex items-center space-x-2">
                             <ThemeToggle />
-                            <SettingsDialog />
+                            <SettingsDialog onDatabaseUpdate={handleDatabaseUpdate} />
                         </li>
                     </ul>
                 </nav>
