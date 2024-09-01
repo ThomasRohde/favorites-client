@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getFavorites, updateFavorite, deleteFavorite } from '../services/api';
+import { getFavorites } from '../services/api';
 import FavoriteCard from './FavoriteCard';
+import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils';
 
 const TagsPage = () => {
   const [favorites, setFavorites] = useState([]);
@@ -49,32 +50,39 @@ const TagsPage = () => {
     );
   }, [selectedTag, favorites]);
 
-  const handleUpdateFavorite = useCallback(async (updatedFavorite) => {
-    try {
-      const result = await updateFavorite(updatedFavorite.id, updatedFavorite);
-      setFavorites(prevFavorites => 
-        prevFavorites.map(fav => fav.id === result.id ? result : fav)
-      );
-    } catch (error) {
-      console.error('Failed to update favorite:', error);
-      // You might want to show an error message to the user here
-    }
-  }, []);
+  const handleUpdateFavorite = useCallback((updatedFavorite) => {
+    setFavorites(prevFavorites => {
+      const updatedFavorites = handleFavoriteUpdate(prevFavorites, updatedFavorite);
+      // If the updated favorite is in the current filtered view, update it
+      if (selectedTag && updatedFavorite.tags.some(tag => tag.id === selectedTag.id)) {
+        return updatedFavorites;
+      } else {
+        // If it's not in the current view, remove it from the filtered list
+        return updatedFavorites.filter(fav => fav.id !== updatedFavorite.id);
+      }
+    });
+  }, [selectedTag]);
 
-  const handleDeleteFavorite = useCallback(async (favoriteId) => {
-    try {
-      await deleteFavorite(favoriteId);
-      setFavorites(prevFavorites => prevFavorites.filter(fav => fav.id !== favoriteId));
-    } catch (error) {
-      console.error('Failed to delete favorite:', error);
-      // You might want to show an error message to the user here
-    }
+  const handleDeleteFavorite = useCallback((deletedFavoriteId) => {
+    setFavorites(prevFavorites => handleFavoriteDelete(prevFavorites, deletedFavoriteId));
   }, []);
 
   const TagCloud = ({ tags }) => {
     const maxCount = Math.max(...tags.map(tag => tag.count));
+    const minCount = Math.min(...tags.map(tag => tag.count));
     const minFontSize = 12;
     const maxFontSize = 36;
+
+    const getTagColor = (count) => {
+      const normalizedCount = (count - minCount) / (maxCount - minCount);
+      const hue = 240 - normalizedCount * 240; // 240 (blue) to 0 (red)
+      return `hsl(${hue}, 70%, 60%)`;
+    };
+
+    const getTagFontSize = (count) => {
+      const normalizedCount = (count - minCount) / (maxCount - minCount);
+      return minFontSize + normalizedCount * (maxFontSize - minFontSize);
+    };
 
     return (
       <div className="flex flex-wrap gap-2 justify-center">
@@ -84,11 +92,14 @@ const TagsPage = () => {
             onClick={() => handleTagClick(tag)}
             className={`px-3 py-1 rounded-full transition-all ${
               selectedTag && selectedTag.id === tag.id
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                : 'hover:opacity-80'
             }`}
             style={{
-              fontSize: `${minFontSize + (tag.count / maxCount) * (maxFontSize - minFontSize)}px`
+              fontSize: `${getTagFontSize(tag.count)}px`,
+              backgroundColor: getTagColor(tag.count),
+              color: 'white',
+              textShadow: '1px 1px 1px rgba(0,0,0,0.3)'
             }}
           >
             {tag.name}
