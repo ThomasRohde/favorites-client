@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink, useParams } from "react-router-dom";
-import { Home, ListTodo, Menu, X, Sun, Moon, Download, Upload, Search } from "lucide-react";
+import { Home, ListTodo, Menu, X, Sun, Moon, Download, Upload, Search, Tag } from "lucide-react";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
@@ -9,6 +9,7 @@ import TasksPage from "./components/TasksPage";
 import ImportDialog from "./components/ImportDialog";
 import ExportDialog from "./components/ExportDialog";
 import SearchPage from "./components/SearchPage";
+import TagsPage from "./components/TagsPage";
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -95,6 +96,19 @@ function AppContent() {
                                 <Search size={20} />
                                 <span className="hidden md:inline">Search</span>
                             </NavLink>
+                            <NavLink
+                                to="/tags"
+                                className={({ isActive }) =>
+                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
+                                        isActive
+                                            ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                                            : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    }`
+                                }
+                            >
+                                <Tag size={20} />
+                                <span className="hidden md:inline">Tags</span>
+                            </NavLink>
                             <button
                                 onClick={() => setIsImportDialogOpen(true)}
                                 className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -163,6 +177,7 @@ function AppContent() {
                             <Route path="/tasks" element={<TasksPage />} />
                             <Route path="/tag-search/:query" element={<FavoritesByFuzzyTag />} />
                             <Route path="/search" element={<SearchPage />} />
+                            <Route path="/tags" element={<TagsPage />} />
                         </Routes>
                     </div>
                 </div>

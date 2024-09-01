@@ -1,7 +1,7 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (47%), JavaScript (16%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (48%), JavaScript (15%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
 The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
@@ -382,7 +382,7 @@ File: src\App.jsx
 
 import React, { useState, useCallback, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, NavLink, useParams } from "react-router-dom";
-import { Home, ListTodo, Menu, X, Sun, Moon, Download, Upload, Search } from "lucide-react";
+import { Home, ListTodo, Menu, X, Sun, Moon, Download, Upload, Search, Tag } from "lucide-react";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import FolderExplorer from "./components/FolderExplorer";
 import FavoritesList from "./components/FavoritesList";
@@ -391,6 +391,7 @@ import TasksPage from "./components/TasksPage";
 import ImportDialog from "./components/ImportDialog";
 import ExportDialog from "./components/ExportDialog";
 import SearchPage from "./components/SearchPage";
+import TagsPage from "./components/TagsPage";
 
 function ThemeToggle() {
     const { isDarkMode, toggleDarkMode } = useTheme();
@@ -477,6 +478,19 @@ function AppContent() {
                                 <Search size={20} />
                                 <span className="hidden md:inline">Search</span>
                             </NavLink>
+                            <NavLink
+                                to="/tags"
+                                className={({ isActive }) =>
+                                    `flex items-center space-x-2 p-2 rounded transition-colors ${
+                                        isActive
+                                            ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                                            : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    }`
+                                }
+                            >
+                                <Tag size={20} />
+                                <span className="hidden md:inline">Tags</span>
+                            </NavLink>
                             <button
                                 onClick={() => setIsImportDialogOpen(true)}
                                 className="flex items-center space-x-2 p-2 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -545,6 +559,7 @@ function AppContent() {
                             <Route path="/tasks" element={<TasksPage />} />
                             <Route path="/tag-search/:query" element={<FavoritesByFuzzyTag />} />
                             <Route path="/search" element={<SearchPage />} />
+                            <Route path="/tags" element={<TagsPage />} />
                         </Routes>
                     </div>
                 </div>
@@ -727,7 +742,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()]
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    port: 5173, // or your preferred port
+  }
 })
 
 ---
@@ -877,6 +896,13 @@ export const vectorSearchFavorites = async (query, limit = 10) => {
   return response.json();
 };
 
+export const getTags = async (skip = 0, limit = 100) => {
+  const response = await fetch(`${API_BASE_URL}/tags/?skip=${skip}&limit=${limit}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch tags');
+  }
+  return response.json();
+};
 
 ---
 

@@ -140,3 +140,11 @@ export const vectorSearchFavorites = async (query, limit = 10) => {
   }
   return response.json();
 };
+
+export const getTags = async (skip = 0, limit = 100) => {
+  const response = await fetch(`${API_BASE_URL}/tags/?skip=${skip}&limit=${limit}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch tags');
+  }
+  return response.json();
+};
