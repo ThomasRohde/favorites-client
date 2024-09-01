@@ -16,12 +16,21 @@ The following is a concise directory tree of the project, limited to 3 levels de
 │   │   ├── CreateFolderModal.jsx
 │   │   ├── HelpModal.jsx
 │   │   ├── DeleteFavorite.jsx
-│   │   └── EditFavorite.jsx
+│   │   ├── EditFavorite.jsx
+│   │   ├── TagEditor.jsx
+│   │   ├── TagsPage.jsx
+│   │   ├── TasksPage.jsx
+│   │   ├── SearchPage.jsx
+│   │   ├── ImportDialog.jsx
+│   │   ├── ExportDialog.jsx
+│   │   ├── FavoriteCard.jsx
+│   │   └── FavoritesByFuzzyTag.jsx
 │   ├── App.jsx
 │   ├── index.css
 │   ├── main.jsx
-│   └── services
-│       └── api.js
+│   ├── services
+│   │   └── api.js
+│   └── ThemeContext.jsx
 ├── index.html
 ├── package.json
 ├── postcss.config.js
@@ -164,7 +173,7 @@ const FavoritesList = ({ selectedFolderId, onFolderSelect }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {favorites.map(favorite => {
           const folderPath = getFolderPath(favorite.folder_id)
           return (
@@ -1287,6 +1296,870 @@ For Docker setup (once implemented):
 2. Run `docker-compose up --build` to build and start the containerized application
 
 Remember to commit your changes regularly and create feature branches for major additions.
+
+---
+
+File: src\components\TagEditor.jsx
+
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, X } from 'lucide-react';
+import { getTags, createTag } from '../services/api';
+
+const TagEditor = ({ currentTags, onAddTag, onRemoveTag }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const [input, setInput] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isAdding) {
+      inputRef.current?.focus();
+    }
+  }, [isAdding]);
+
+  const handleInputChange = async (e) => {
+    const value = e.target.value;
+    setInput(value);
+    if (value.length > 0) {
+      const allTags = await getTags();
+      const filteredSuggestions = allTags
+        .filter(tag => tag.name.toLowerCase().includes(value.toLowerCase()))
+        .filter(tag => !currentTags.some(currentTag => currentTag.id === tag.id));
+      setSuggestions(filteredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleAddTag = async (tagName) => {
+    let tag;
+    const existingTag = suggestions.find(t => t.name.toLowerCase() === tagName.toLowerCase());
+    if (existingTag) {
+      tag = existingTag;
+    } else {
+      tag = await createTag(tagName);
+    }
+    onAddTag(tag);
+    setInput('');
+    setSuggestions([]);
+    setIsAdding(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && input) {
+      handleAddTag(input);
+    } else if (e.key === 'Escape') {
+      setIsAdding(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {currentTags.map(tag => (
+        <span key={tag.id} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-sm flex items-center">
+          {tag.name}
+          <button onClick={() => onRemoveTag(tag.id)} className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
+            <X size={14} />
+          </button>
+        </span>
+      ))}
+      {isAdding ? (
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            placeholder="Add tag..."
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md mt-1 max-h-40 overflow-auto">
+              {suggestions.map(tag => (
+                <li
+                  key={tag.id}
+                  onClick={() => handleAddTag(tag.name)}
+                  className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                  {tag.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+        >
+          <Plus size={20} />
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default TagEditor;
+
+---
+
+File: src\components\TagsPage.jsx
+
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { getFavorites } from '../services/api';
+import FavoriteCard from './FavoriteCard';
+import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils';
+
+const TagsPage = () => {
+  const [favorites, setFavorites] = useState([]);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  const fetchFavorites = async () => {
+    try {
+      const fetchedFavorites = await getFavorites();
+      setFavorites(fetchedFavorites);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching favorites:', err);
+      setError('Failed to fetch favorites');
+      setLoading(false);
+    }
+  };
+
+  const tagsWithCount = useMemo(() => {
+    const tagMap = new Map();
+    favorites.forEach(favorite => {
+      favorite.tags.forEach(tag => {
+        if (tagMap.has(tag.id)) {
+          tagMap.get(tag.id).count += 1;
+        } else {
+          tagMap.set(tag.id, { ...tag, count: 1 });
+        }
+      });
+    });
+    return Array.from(tagMap.values());
+  }, [favorites]);
+
+  const handleTagClick = (tag) => {
+    setSelectedTag(tag);
+  };
+
+  const filteredFavorites = useMemo(() => {
+    if (!selectedTag) return [];
+    return favorites.filter(favorite => 
+      favorite.tags.some(tag => tag.id === selectedTag.id)
+    );
+  }, [selectedTag, favorites]);
+
+  const handleUpdateFavorite = useCallback((updatedFavorite) => {
+    setFavorites(prevFavorites => {
+      const updatedFavorites = handleFavoriteUpdate(prevFavorites, updatedFavorite);
+      // If the updated favorite is in the current filtered view, update it
+      if (selectedTag && updatedFavorite.tags.some(tag => tag.id === selectedTag.id)) {
+        return updatedFavorites;
+      } else {
+        // If it's not in the current view, remove it from the filtered list
+        return updatedFavorites.filter(fav => fav.id !== updatedFavorite.id);
+      }
+    });
+  }, [selectedTag]);
+
+  const handleDeleteFavorite = useCallback((deletedFavoriteId) => {
+    setFavorites(prevFavorites => handleFavoriteDelete(prevFavorites, deletedFavoriteId));
+  }, []);
+
+  const TagCloud = ({ tags }) => {
+    const maxCount = Math.max(...tags.map(tag => tag.count));
+    const minCount = Math.min(...tags.map(tag => tag.count));
+    const minFontSize = 12;
+    const maxFontSize = 36;
+
+    const getTagColor = (count) => {
+      const normalizedCount = (count - minCount) / (maxCount - minCount);
+      const hue = 240 - normalizedCount * 240; // 240 (blue) to 0 (red)
+      return `hsl(${hue}, 70%, 60%)`;
+    };
+
+    const getTagFontSize = (count) => {
+      const normalizedCount = (count - minCount) / (maxCount - minCount);
+      return minFontSize + normalizedCount * (maxFontSize - minFontSize);
+    };
+
+    return (
+      <div className="flex flex-wrap gap-2 justify-center">
+        {tags.map(tag => (
+          <button
+            key={tag.id}
+            onClick={() => handleTagClick(tag)}
+            className={`px-3 py-1 rounded-full transition-all ${
+              selectedTag && selectedTag.id === tag.id
+                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                : 'hover:opacity-80'
+            }`}
+            style={{
+              fontSize: `${getTagFontSize(tag.count)}px`,
+              backgroundColor: getTagColor(tag.count),
+              color: 'white',
+              textShadow: '1px 1px 1px rgba(0,0,0,0.3)'
+            }}
+          >
+            {tag.name}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  if (loading) return <div className="text-center mt-8">Loading...</div>;
+  if (error) return <div className="text-center mt-8 text-red-500">{error}</div>;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">Tags</h1>
+      <TagCloud tags={tagsWithCount} />
+      {selectedTag && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Favorites tagged with "{selectedTag.name}"</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredFavorites.map(favorite => (
+              <FavoriteCard
+                key={favorite.id}
+                favorite={favorite}
+                onUpdate={handleUpdateFavorite}
+                onDelete={handleDeleteFavorite}
+              />
+            ))}
+          </div>
+          {filteredFavorites.length === 0 && (
+            <p className="text-center text-gray-500 mt-4">No favorites found with this tag.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TagsPage;
+
+---
+
+File: src\components\TasksPage.jsx
+
+import React, { useState, useEffect } from 'react';
+import { getTasks, restartImport } from '../services/api';
+import { RefreshCw } from 'lucide-react';
+
+const TasksPage = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const tasksData = await getTasks();
+      setTasks(tasksData);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      setError('Failed to fetch tasks');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+
+    // Set up polling every 5 seconds
+    const pollInterval = setInterval(fetchTasks, 5000);
+
+    // Clean up function to clear the interval when the component unmounts
+    return () => clearInterval(pollInterval);
+  }, []);
+
+  const handleRestartImport = async () => {
+    try {
+      await restartImport();
+      // Refetch tasks to show updated status
+      fetchTasks();
+    } catch (err) {
+      console.error('Error restarting import:', err);
+      setError('Failed to restart import');
+    }
+  };
+
+  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading tasks...</div>;
+  if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">Tasks</h2>
+      {tasks.map((task) => (
+        <div key={task.id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{task.name}</h3>
+          <p className="text-gray-600 dark:text-gray-400">Status: {task.status}</p>
+          <p className="text-gray-600 dark:text-gray-400">Progress: {task.progress}</p>
+          {task.status === 'restartable' && (
+            <button
+              onClick={handleRestartImport}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 flex items-center"
+            >
+              <RefreshCw size={18} className="mr-2" />
+              Restart Import
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default TasksPage;
+
+---
+
+File: src\components\SearchPage.jsx
+
+import React, { useState, useCallback } from 'react';
+import { vectorSearchFavorites } from '../services/api';
+import FavoriteCard from './FavoriteCard';
+import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils';
+
+const SearchPage = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSearch = useCallback(async () => {
+    if (!searchQuery.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await vectorSearchFavorites(searchQuery);
+      setSearchResults(results);
+    } catch (err) {
+      console.error('Error performing search:', err);
+      setError('Failed to perform search');
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery]);
+
+  const handleUpdateFavorite = useCallback((updatedFavorite) => {
+    setSearchResults(prevResults => 
+      handleFavoriteUpdate(prevResults, updatedFavorite)
+    );
+  }, []);
+
+  const handleDeleteFavorite = useCallback((deletedFavoriteId) => {
+    setSearchResults(prevResults => 
+      handleFavoriteDelete(prevResults, deletedFavoriteId)
+    );
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Search Favorites</h1>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Enter search query"
+          className="w-full p-2 border rounded"
+        />
+        <button
+          onClick={handleSearch}
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Search
+        </button>
+      </div>
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {searchResults.map(favorite => (
+          <FavoriteCard
+            key={favorite.id}
+            favorite={favorite}
+            onUpdate={handleUpdateFavorite}
+            onDelete={handleDeleteFavorite}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default SearchPage;
+
+---
+
+File: src\components\ImportDialog.jsx
+
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { importFavorites } from '../services/api';
+
+const ImportDialog = ({ isOpen, onClose }) => {
+  const [file, setFile] = useState(null);
+  const [importStatus, setImportStatus] = useState('');
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleImport = async () => {
+    if (!file) {
+      setImportStatus('Please select a file to import.');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target.result;
+        const favorites = JSON.parse(content);
+        await importFavorites(favorites);
+        setImportStatus('Import successful!');
+        setTimeout(() => {
+          onClose();
+          setImportStatus('');
+          setFile(null);
+        }, 2000);
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      console.error('Import failed:', error);
+      setImportStatus('Import failed. Please check your file and try again.');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Import Favorites</h2>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+            <X size={24} />
+          </button>
+        </div>
+        <div className="mb-4">
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100
+            "
+          />
+        </div>
+        <button
+          onClick={handleImport}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Import
+        </button>
+        {importStatus && <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{importStatus}</p>}
+      </div>
+    </div>
+  );
+};
+
+export default ImportDialog;
+
+---
+
+File: src\components\ExportDialog.jsx
+
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { exportFavorites } from '../services/api';
+
+const ExportDialog = ({ isOpen, onClose }) => {
+  const [exportStatus, setExportStatus] = useState('');
+
+  const handleExport = async () => {
+    try {
+      const favorites = await exportFavorites();
+      const dataStr = JSON.stringify(favorites, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'favorites_export.json';
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      setExportStatus('Export successful! Your file is being downloaded.');
+      setTimeout(() => {
+        onClose();
+        setExportStatus('');
+      }, 2000);
+    } catch (error) {
+      console.error('Export failed:', error);
+      setExportStatus('Export failed. Please try again.');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Export Favorites</h2>
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+            <X size={24} />
+          </button>
+        </div>
+        <button
+          onClick={handleExport}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Export Favorites
+        </button>
+        {exportStatus && <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">{exportStatus}</p>}
+      </div>
+    </div>
+  );
+};
+
+export default ExportDialog;
+
+---
+
+File: src\components\FavoriteCard.jsx
+
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, ChevronRight, Plus, X } from "lucide-react";
+import EditFavorite from "./EditFavorite";
+import DeleteFavorite from "./DeleteFavorite";
+import { useNavigate } from "react-router-dom";
+import { updateFavorite, getTags, createTag } from "../services/api";
+
+const FavoriteCard = ({ favorite, onUpdate, onDelete, onFolderSelect, folderPath }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isAddingTag, setIsAddingTag] = useState(false);
+    const [newTagInput, setNewTagInput] = useState("");
+    const [tagSuggestions, setTagSuggestions] = useState([]);
+    const navigate = useNavigate();
+
+    const toggleDescription = () => {
+        setIsExpanded(!isExpanded);
+    };
+
+    const handleTagClick = (tagName) => {
+        navigate(`/tag-search/${encodeURIComponent(tagName)}`);
+    };
+
+    const handleAddTag = async () => {
+        setIsAddingTag(true);
+    };
+
+    const handleTagInputChange = async (e) => {
+        const input = e.target.value;
+        setNewTagInput(input);
+        if (input.length > 0) {
+            const allTags = await getTags();
+            const filtered = allTags.filter(
+                (tag) =>
+                    tag.name.toLowerCase().includes(input.toLowerCase()) &&
+                    !favorite.tags.some((existingTag) => existingTag.id === tag.id)
+            );
+            setTagSuggestions(filtered);
+        } else {
+            setTagSuggestions([]);
+        }
+    };
+
+    const addTagToFavorite = async (tagToAdd) => {
+        const updatedTags = [...favorite.tags, tagToAdd];
+        try {
+            const updatedFavorite = await updateFavorite(favorite.id, { tags: updatedTags.map((tag) => tag.name) });
+            onUpdate(updatedFavorite);
+            setIsAddingTag(false);
+            setNewTagInput("");
+            setTagSuggestions([]);
+        } catch (error) {
+            console.error("Failed to add tag:", error);
+        }
+    };
+
+    const handleTagKeyDown = async (e) => {
+        if (e.key === "Enter" && newTagInput) {
+            e.preventDefault();
+            let tagToAdd;
+            const existingTag = tagSuggestions.find((tag) => tag.name.toLowerCase() === newTagInput.toLowerCase());
+            if (existingTag) {
+                tagToAdd = existingTag;
+            } else {
+                tagToAdd = await createTag(newTagInput);
+            }
+            addTagToFavorite(tagToAdd);
+        } else if (e.key === "Escape") {
+            setIsAddingTag(false);
+            setNewTagInput("");
+            setTagSuggestions([]);
+        }
+    };
+
+    const removeTag = async (tagId) => {
+        const updatedTags = favorite.tags.filter((tag) => tag.id !== tagId);
+        try {
+            const updatedFavorite = await updateFavorite(favorite.id, { tags: updatedTags.map((tag) => tag.name) });
+            onUpdate(updatedFavorite);
+        } catch (error) {
+            console.error("Failed to remove tag:", error);
+        }
+    };
+
+    return (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xl font-semibold">
+                    <a
+                        href={favorite.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                        {favorite.title || "Untitled"}
+                    </a>
+                </h3>
+                <div className="flex space-x-2">
+                    <EditFavorite favorite={favorite} onUpdate={onUpdate} />
+                    <DeleteFavorite favorite={favorite} onDelete={onDelete} />
+                </div>
+            </div>
+            {folderPath && folderPath.length > 0 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center flex-wrap">
+                    {folderPath.map((folder, index) => (
+                        <React.Fragment key={folder.id}>
+                            <button
+                                onClick={() => onFolderSelect(folder.id, folder.name)}
+                                className="hover:text-blue-500 dark:hover:text-blue-400 focus:outline-none focus:text-blue-500 dark:focus:text-blue-400 transition-colors duration-200"
+                            >
+                                {folder.name}
+                            </button>
+                            {index < folderPath.length - 1 && <ChevronRight size={14} className="mx-1" />}
+                        </React.Fragment>
+                    ))}
+                </div>
+            )}
+            <div className="text-gray-600 dark:text-gray-300 mb-2">
+                {isExpanded ? (
+                    <p>{favorite.summary || "No summary available"}</p>
+                ) : (
+                    <p>
+                        {favorite.summary
+                            ? `${favorite.summary.slice(0, 100)}${favorite.summary.length > 100 ? "..." : ""}`
+                            : "No summary available"}
+                    </p>
+                )}
+                {favorite.summary && favorite.summary.length > 100 && (
+                    <button
+                        onClick={toggleDescription}
+                        className="text-blue-500 dark:text-blue-400 text-xs hover:underline focus:outline-none mt-1 flex items-center"
+                    >
+                        {isExpanded ? (
+                            <>
+                                <ChevronUp size={16} className="mr-1" />
+                                Show less
+                            </>
+                        ) : (
+                            <>
+                                <ChevronDown size={16} className="mr-1" />
+                                Show more
+                            </>
+                        )}
+                    </button>
+                )}
+            </div>
+            <div className="flex flex-wrap items-center">
+                {favorite.tags &&
+                    favorite.tags.map((tag) => (
+                        <div
+                            key={tag.id}
+                            className="flex items-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded-full mr-1.5 mb-1.5 text-xs"
+                        >
+                            <button
+                                onClick={() => handleTagClick(tag.name)}
+                                className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
+                            >
+                                {tag.name}
+                            </button>
+                            <button
+                                onClick={() => removeTag(tag.id)}
+                                className="ml-0.5 text-gray-500 hover:text-red-500 focus:outline-none"
+                            >
+                                <X size={10} />
+                            </button>
+                        </div>
+                    ))}
+                {isAddingTag ? (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={newTagInput}
+                            onChange={handleTagInputChange}
+                            onKeyDown={handleTagKeyDown}
+                            className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            placeholder="Add tag..."
+                            autoFocus
+                        />
+                        {tagSuggestions.length > 0 && (
+                            <ul className="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md mt-1 max-h-40 overflow-auto">
+                                {tagSuggestions.map((tag) => (
+                                    <li
+                                        key={tag.id}
+                                        onClick={() => addTagToFavorite(tag)}
+                                        className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                    >
+                                        {tag.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                ) : (
+                    <button
+                        onClick={handleAddTag}
+                        className="bg-blue-500 text-white px-1.5 py-0.5 rounded-full mr-1.5 mb-1.5 text-xs hover:bg-blue-600 transition-colors duration-200 flex items-center"
+                    >
+                        <Plus size={10} className="mr-0.5" />
+                        Add
+                    </button>
+                )}
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Created: {new Date(favorite.created_at).toLocaleDateString()}
+            </div>
+        </div>
+    );
+};
+
+export default FavoriteCard;
+
+
+---
+
+File: src\components\FavoritesByFuzzyTag.jsx
+
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { getFavoritesByFuzzyTag } from '../services/api'
+import FavoriteCard from './FavoriteCard'
+import { handleFavoriteUpdate, handleFavoriteDelete } from '../utils/favoriteUtils'
+
+const FavoritesByFuzzyTag = () => {
+  const { query } = useParams()
+  const [favorites, setFavorites] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const favoritesData = await getFavoritesByFuzzyTag(query)
+        setFavorites(favoritesData)
+        setLoading(false)
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        setError('Failed to fetch favorites')
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [query])
+
+  const handleUpdateFavorite = (updatedFavorite) => {
+    setFavorites(handleFavoriteUpdate(favorites, updatedFavorite))
+  }
+
+  const handleDeleteFavorite = (deletedFavoriteId) => {
+    setFavorites(handleFavoriteDelete(favorites, deletedFavoriteId))
+  }
+
+  if (loading) return <div className="text-gray-600 dark:text-gray-300">Loading favorites...</div>
+  if (error) return <div className="text-red-500 dark:text-red-400">{error}</div>
+
+  if (!favorites || favorites.length === 0) {
+    return <div className="text-gray-600 dark:text-gray-300">No favorites found for this tag query</div>
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+        Favorites for tag: {query}
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {favorites.map(favorite => (
+          <FavoriteCard
+            key={favorite.id}
+            favorite={favorite}
+            onUpdate={handleUpdateFavorite}
+            onDelete={handleDeleteFavorite}
+            onFolderSelect={() => {}} // Placeholder function, as we don't handle folder selection here
+            folderPath={[]} // Empty array, as we don't have folder information in this context
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default FavoritesByFuzzyTag
+
+---
+
+File: src\ThemeContext.jsx
+
+import React, { createContext, useState, useContext, useEffect } from 'react';
+
+const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(isDark);
+    document.documentElement.classList.toggle('dark', isDark);
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('darkMode', newMode);
+    document.documentElement.classList.toggle('dark', newMode);
+  };
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
 
 ---
 
