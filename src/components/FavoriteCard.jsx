@@ -84,7 +84,7 @@ const FavoriteCard = ({ favorite, onUpdate, onDelete, onFolderSelect, folderPath
     return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
             <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-semibold">
+                <h3 className="text-lg font-semibold">
                     <a
                         href={favorite.url}
                         target="_blank"
@@ -114,7 +114,7 @@ const FavoriteCard = ({ favorite, onUpdate, onDelete, onFolderSelect, folderPath
                     ))}
                 </div>
             )}
-            <div className="text-gray-600 dark:text-gray-300 mb-2">
+            <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
                 {isExpanded ? (
                     <p>{favorite.summary || "No summary available"}</p>
                 ) : (
@@ -199,7 +199,7 @@ const FavoriteCard = ({ favorite, onUpdate, onDelete, onFolderSelect, folderPath
                     </button>
                 )}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                 Created: {new Date(favorite.created_at).toLocaleDateString()}
             </div>
         </div>

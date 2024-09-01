@@ -68,38 +68,39 @@ const TagsPage = () => {
   }, []);
 
   const TagCloud = ({ tags }) => {
-    const maxCount = Math.max(...tags.map(tag => tag.count));
-    const minCount = Math.min(...tags.map(tag => tag.count));
-    const minFontSize = 12;
-    const maxFontSize = 36;
-
+    const filteredTags = tags.filter(tag => tag.count > 1);
+    const maxCount = Math.max(...filteredTags.map(tag => tag.count));
+    const minCount = Math.min(...filteredTags.map(tag => tag.count));
+    const minFontSize = 10;
+    const maxFontSize = 16;
+  
     const getTagColor = (count) => {
       const normalizedCount = (count - minCount) / (maxCount - minCount);
       const hue = 240 - normalizedCount * 240; // 240 (blue) to 0 (red)
       return `hsl(${hue}, 70%, 60%)`;
     };
-
+  
     const getTagFontSize = (count) => {
       const normalizedCount = (count - minCount) / (maxCount - minCount);
       return minFontSize + normalizedCount * (maxFontSize - minFontSize);
     };
-
+  
     return (
-      <div className="flex flex-wrap gap-2 justify-center">
-        {tags.map(tag => (
+      <div className="flex flex-wrap gap-1 justify-center">
+        {filteredTags.map(tag => (
           <button
             key={tag.id}
             onClick={() => handleTagClick(tag)}
-            className={`px-3 py-1 rounded-full transition-all ${
+            className={`px-2 py-0.5 rounded-full transition-all ${
               selectedTag && selectedTag.id === tag.id
-                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                ? 'ring-1 ring-blue-500 dark:ring-blue-400'
                 : 'hover:opacity-80'
             }`}
             style={{
               fontSize: `${getTagFontSize(tag.count)}px`,
               backgroundColor: getTagColor(tag.count),
               color: 'white',
-              textShadow: '1px 1px 1px rgba(0,0,0,0.3)'
+              textShadow: '0.5px 0.5px 0.5px rgba(0,0,0,0.3)'
             }}
           >
             {tag.name}
