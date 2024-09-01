@@ -1,7 +1,7 @@
 # Project: favorites-client
 
 ## Overview
-This project is primarily written in React (48%), JavaScript (15%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
+This project is primarily written in React (50%), JavaScript (15%), JSON (9%), HTML (3%), CSS (3%) and uses the following technology stack: CSS, Git, HTML, JSON, JavaScript, Node.js, PostCSS, React, Tailwind CSS, Vite, npm.
 
 ## Dependencies
 The main dependencies for this project are: lucide-react, react, react-dom, react-icons, react-router-dom, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, postcss, tailwindcss, vite
@@ -900,6 +900,20 @@ export const getTags = async (skip = 0, limit = 100) => {
   const response = await fetch(`${API_BASE_URL}/tags/?skip=${skip}&limit=${limit}`);
   if (!response.ok) {
     throw new Error('Failed to fetch tags');
+  }
+  return response.json();
+};
+
+export const createTag = async (name) => {
+  const response = await fetch(`${API_BASE_URL}/tags/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create tag');
   }
   return response.json();
 };

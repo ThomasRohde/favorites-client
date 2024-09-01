@@ -148,3 +148,17 @@ export const getTags = async (skip = 0, limit = 100) => {
   }
   return response.json();
 };
+
+export const createTag = async (name) => {
+  const response = await fetch(`${API_BASE_URL}/tags/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create tag');
+  }
+  return response.json();
+};
